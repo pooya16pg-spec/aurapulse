@@ -35,7 +35,7 @@ export default function TradeTicketPanel() {
 
   const handlePercentage = (pct: number) => {
     if (side === "BUY") {
-      setUsdInput(Math.floor((balanceUSD * pct) / 100).toString());
+      setUsdInput(Math.floor((balanceUSD * pct) / (100 * 1.001)).toString());
     } else {
       const maxSellUSD = userUnits * activeAsset.price;
       setUsdInput(Math.floor((maxSellUSD * pct) / 100).toString());
