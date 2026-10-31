@@ -8,15 +8,13 @@ import OrderBookPanel from "../components/OrderBookPanel";
 import TradeTicketPanel from "../components/TradeTicketPanel";
 import PortfolioPositions from "../components/PortfolioPositions";
 import CommandPaletteModal from "../components/CommandPaletteModal";
+import SmartAssetImage from "../components/SmartAssetImage";
 import {
   Cpu,
   ExternalLink,
   Flame,
-  Layers,
   ShieldCheck,
-  Sparkles,
   Terminal,
-  TrendingUp,
 } from "lucide-react";
 
 export default function AuraPulseTerminalPage() {
@@ -26,7 +24,6 @@ export default function AuraPulseTerminalPage() {
     theme,
     workspace,
     assets,
-    selectedSymbol,
     setSelectedSymbol,
     setWorkspace,
     aiLogs,
@@ -54,7 +51,6 @@ export default function AuraPulseTerminalPage() {
       <TopNav />
 
       <main className="flex-1 max-w-[1720px] w-full mx-auto px-3 lg:px-8 py-4 space-y-5 min-w-0">
-        {/* محیط کاری ۱: ترمینال معاملاتی اصلی */}
         {workspace === "TERMINAL" && (
           <>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
@@ -72,7 +68,6 @@ export default function AuraPulseTerminalPage() {
           </>
         )}
 
-        {/* محیط کاری ۲: نقشه حرارتی بازار (Market Heatmap) */}
         {workspace === "HEATMAP" && (
           <div
             dir={lang === "fa" ? "rtl" : "ltr"}
@@ -132,16 +127,23 @@ export default function AuraPulseTerminalPage() {
                     </div>
 
                     <div className="text-2xl font-mono font-black text-white mt-4">
-                      ${a.price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      $
+                      {a.price.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
                     </div>
 
                     <div className="mt-4 pt-3 border-t border-white/10 grid grid-cols-2 gap-2 text-[11px] font-mono">
                       <div>
                         <span className="text-slate-400 block">24h Vol</span>
-                        <span className="text-white font-bold">{a.volume24h}</span>
+                        <span className="text-white font-bold">
+                          {a.volume24h}
+                        </span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block">Whale Score</span>
+                        <span className="text-slate-400 block">
+                          Whale Score
+                        </span>
                         <span className="text-emerald-400 font-bold">
                           {a.whaleScore}/100
                         </span>
@@ -156,7 +158,6 @@ export default function AuraPulseTerminalPage() {
           </div>
         )}
 
-        {/* محیط کاری ۳: آزمایشگاه هوش مصنوعی و بک‌تست (AI Quant Lab) */}
         {workspace === "AILAB" && (
           <div
             dir={lang === "fa" ? "rtl" : "ltr"}
@@ -179,7 +180,9 @@ export default function AuraPulseTerminalPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
                 <div className="p-4 rounded-xl bg-[#020408] border border-white/10">
-                  <div className="text-xs text-slate-400">Expected Annual Return</div>
+                  <div className="text-xs text-slate-400">
+                    Expected Annual Return
+                  </div>
                   <div className="text-xl font-black text-emerald-400 mt-1">
                     +142.8%
                   </div>
@@ -197,7 +200,9 @@ export default function AuraPulseTerminalPage() {
                   </div>
                 </div>
                 <div className="p-4 rounded-xl bg-[#020408] border border-white/10">
-                  <div className="text-xs text-slate-400">Value at Risk (99% VaR)</div>
+                  <div className="text-xs text-slate-400">
+                    Value at Risk (99% VaR)
+                  </div>
                   <div className="text-xl font-black text-purple-300 mt-1">
                     1.18%
                   </div>
@@ -237,7 +242,9 @@ export default function AuraPulseTerminalPage() {
                       : "Live Neural Execution Telemetry"}
                   </h3>
                 </div>
-                <span className="font-mono text-[10px] text-cyan-400">STREAMING</span>
+                <span className="font-mono text-[10px] text-cyan-400">
+                  STREAMING
+                </span>
               </div>
               <div
                 dir="ltr"
@@ -253,32 +260,51 @@ export default function AuraPulseTerminalPage() {
           </div>
         )}
 
-        {/* محیط کاری ۴: شناسنامه معماری مهندسی پویا گودرزی */}
+        {/* محیط کاری ۴: شناسنامه معماری مهندسی پویا گودرزی با قاب عکس بزرگ */}
         {workspace === "ARCHITECT" && (
           <div
             dir={lang === "fa" ? "rtl" : "ltr"}
-            className="cyber-card rounded-2xl border border-emerald-400/40 p-6 space-y-5"
+            className="cyber-card rounded-2xl border border-emerald-400/40 p-6 space-y-6"
           >
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
-              <div>
-                <span className="text-xs font-mono px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                  FLAGSHIP PORTFOLIO PROJECT #2
-                </span>
-                <h2 className="text-xl md:text-2xl font-black text-white mt-2">
-                  {lang === "fa"
-                    ? "معماری مهندسی AuraPulse — طراحی و توسعه توسط پویا گودرزی"
-                    : "AuraPulse System Architecture — Engineered by Pooya Goodarzi"}
-                </h2>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-white/10 pb-6">
+              <div className="flex flex-col sm:flex-row items-center gap-5">
+                <div className="w-28 h-28 rounded-2xl overflow-hidden border-2 border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)] bg-slate-900 shrink-0 flex items-center justify-center">
+                  <SmartAssetImage
+                    baseName="pooya-fintech"
+                    alt="Pooya Goodarzi"
+                    fallback={
+                      <span className="font-mono font-black text-3xl text-emerald-400">
+                        PG
+                      </span>
+                    }
+                  />
+                </div>
+                <div className="text-center sm:text-start">
+                  <span className="text-xs font-mono px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                    LEAD SYSTEM ARCHITECT • PORTFOLIO #2
+                  </span>
+                  <h2 className="text-xl md:text-2xl font-black text-white mt-2">
+                    {lang === "fa"
+                      ? "پویا گودرزی — مهندس کامپیوتر و معمار سیستم‌های فین‌تک"
+                      : "Pooya Goodarzi — Computer Engineer & FinTech Architect"}
+                  </h2>
+                  <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                    {lang === "fa"
+                      ? "طراحی و مهندسی صفر تا صد ترمینال کوانتومی AuraPulse با معماری واکنش‌گرای بدون تاخیر، موتور چارت برداری اختصاصی و رابط کاربری فضایی."
+                      : "End-to-end engineering of the AuraPulse Quantum Terminal featuring custom vector charting, reactive L2 order-book state, and spatial UI/UX."}
+                  </p>
+                </div>
               </div>
+
               <a
                 href="https://pooya16pg-spec.github.io/pooya-os/"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-bold text-xs"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-bold text-xs shrink-0 shadow-lg"
               >
                 <span>
                   {lang === "fa"
-                    ? "مشاهده پروژه اول (سیستم‌عامل فضایی Pooya.OS)"
+                    ? "مشاهده پروژه اول (Pooya.OS)"
                     : "Launch Project #1: Pooya.OS"}
                 </span>
                 <ExternalLink className="w-4 h-4" />
@@ -288,17 +314,17 @@ export default function AuraPulseTerminalPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-[#020408]/90 border border-white/10 space-y-2">
                 <div className="text-cyan-400 font-mono font-bold text-xs">
-                  01 / PURE SVG VECTOR CHART ENGINE
+                  01 / HYBRID VECTOR CHART ENGINE
                 </div>
                 <h3 className="text-sm font-bold text-white">
                   {lang === "fa"
-                    ? "موتور گرافیک برداری بدون افت کیفیت در زوم و موبایل"
-                    : "Resolution-Independent SVG Charting"}
+                    ? "موتور چارت برداری بدون افت کیفیت در زوم و اندروید"
+                    : "Resolution-Independent Vector Charting"}
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   {lang === "fa"
-                    ? "رندرینگ هم‌زمان کندل‌استیک‌های OHLC، کانال باندهای بولینگر، میانگین متحرک EMA-9/21 و اسیلاتور RSI بدون وابستگی به کتابخانه‌های آماده."
-                    : "Custom-built zero-dependency SVG financial charting engine with Bollinger Bands, dual EMA overlays, and RSI oscillator."}
+                    ? "رندرینگ هم‌زمان کندل‌استیک‌های OHLC، کانال باندهای بولینگر، میانگین متحرک EMA-9/21 و اسیلاتور RSI بدون کشیدگی فونت."
+                    : "Custom zero-dependency financial charting engine with Bollinger Bands, dual EMA overlays, and RSI oscillator."}
                 </p>
               </div>
 
@@ -329,7 +355,7 @@ export default function AuraPulseTerminalPage() {
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   {lang === "fa"
-                    ? "مجهز به ۳ تم رنگی زنده (Cyber / Nebula / WallSt)، پالت فرمان سریع (Ctrl+K)، پشتیبانی دوزبانه (FA/EN) و واکنش‌گرایی کامل در اندروید و ویندوز."
+                    ? "مجهز به ۳ تم رنگی زنده (Cyber / Nebula / WallSt)، پالت فرمان سریع (Ctrl+K)، پشتیبانی دوزبانه (FA/EN) و واکنش‌گرایی کامل."
                     : "Features 3 live institutional color themes, keyboard-first Command Palette (Ctrl+K), and adaptive RTL/LTR layouts."}
                 </p>
               </div>

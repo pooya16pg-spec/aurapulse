@@ -7,8 +7,8 @@ import {
   ActiveWorkspace,
   ThemePreset,
 } from "../store/useAuraStore";
+import SmartAssetImage from "./SmartAssetImage";
 import {
-  Activity,
   Bot,
   Command,
   Cpu,
@@ -66,11 +66,36 @@ export default function TopNav() {
     totalCostBasis > 0 ? (unrealizedPnL / totalCostBasis) * 100 : 0;
   const totalNetWorth = balanceUSD + holdingsValue;
 
-  const WORKSPACES: { id: ActiveWorkspace; fa: string; en: string; icon: any }[] = [
-    { id: "TERMINAL", fa: "ترمینال معاملاتی کوانتوم", en: "Quantum Terminal", icon: LineChart },
-    { id: "HEATMAP", fa: "نقشه حرارتی و رادار بازار", en: "Market Heatmap", icon: LayoutGrid },
-    { id: "AILAB", fa: "آزمایشگاه هوش مصنوعی (AI Lab)", en: "AI Quant Lab", icon: Cpu },
-    { id: "ARCHITECT", fa: "معماری سیستم (پویا گودرزی)", en: "System Architecture", icon: ShieldCheck },
+  const WORKSPACES: {
+    id: ActiveWorkspace;
+    fa: string;
+    en: string;
+    icon: any;
+  }[] = [
+    {
+      id: "TERMINAL",
+      fa: "ترمینال معاملاتی کوانتوم",
+      en: "Quantum Terminal",
+      icon: LineChart,
+    },
+    {
+      id: "HEATMAP",
+      fa: "نقشه حرارتی و رادار بازار",
+      en: "Market Heatmap",
+      icon: LayoutGrid,
+    },
+    {
+      id: "AILAB",
+      fa: "آزمایشگاه هوش مصنوعی (AI Lab)",
+      en: "AI Quant Lab",
+      icon: Cpu,
+    },
+    {
+      id: "ARCHITECT",
+      fa: "معماری سیستم (پویا گودرزی)",
+      en: "System Architecture",
+      icon: ShieldCheck,
+    },
   ];
 
   const THEMES: { id: ThemePreset; label: string; dot: string }[] = [
@@ -87,7 +112,7 @@ export default function TopNav() {
           <div className="flex items-center gap-3 shrink-0">
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 font-bold">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-              SPATIAL QUANT OS v8.0
+              SPATIAL QUANT OS v8.5
             </span>
             {symbols.map((sym) => {
               const a = assets[sym];
@@ -113,7 +138,7 @@ export default function TopNav() {
             })}
           </div>
           <div className="hidden xl:flex items-center gap-4 text-slate-400 shrink-0">
-            <span className="text-cyan-300">Engine: Pure SVG Vector 144Hz</span>
+            <span className="text-cyan-300">Engine: Pure Vector HD 144Hz</span>
             <span>Lead Architect: Pooya Goodarzi</span>
           </div>
         </div>
@@ -129,18 +154,36 @@ export default function TopNav() {
                 AuraPulse
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 font-bold">
-                SPATIAL v8.0
+                SPATIAL v8.5
               </span>
             </div>
 
-            <div className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-slate-200">
-              <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span className="font-medium">
-                {lang === "fa"
-                  ? "پویا گودرزی — مهندس کامپیوتر | معمار فول‌استک و طراح UI/UX"
-                  : "Pooya Goodarzi — Computer Engineer | Full-Stack & UI/UX Architect"}
-              </span>
-            </div>
+            <button
+              onClick={() => setWorkspace("ARCHITECT")}
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 transition-all text-xs text-slate-100"
+            >
+              <div className="w-8 h-8 rounded-xl overflow-hidden border border-emerald-400/60 bg-gradient-to-br from-emerald-500/30 to-cyan-500/30 shrink-0 flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.35)]">
+                <SmartAssetImage
+                  baseName="pooya-fintech"
+                  alt="Pooya Goodarzi"
+                  fallback={
+                    <span className="font-mono font-black text-[11px] text-emerald-300">
+                      PG
+                    </span>
+                  }
+                />
+              </div>
+              <div className="text-start">
+                <div className="font-bold text-white leading-tight">
+                  {lang === "fa" ? "پویا گودرزی" : "Pooya Goodarzi"}
+                </div>
+                <div className="text-[10px] text-cyan-300 font-mono">
+                  {lang === "fa"
+                    ? "معمار سیستم و طراح UI/UX"
+                    : "System & UI/UX Architect"}
+                </div>
+              </div>
+            </button>
           </div>
 
           {/* انتخابگر تم رنگی + کنترل‌های سیستم */}
@@ -204,30 +247,13 @@ export default function TopNav() {
               <Globe className="w-3.5 h-3.5 text-cyan-300" />
               <span>{lang === "fa" ? "EN" : "FA"}</span>
             </button>
-
-            <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-emerald-400/60 bg-slate-900 shrink-0 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.4)]">
-              <img
-                src="/aurapulse/assets/pooya-fintech.webp"
-                alt="Pooya Goodarzi"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  if (target.src.includes("/aurapulse/assets/")) {
-                    target.src = "/assets/pooya-fintech.webp";
-                  } else {
-                    target.style.display = "none";
-                  }
-                }}
-              />
-              <Activity className="w-4 h-4 text-emerald-400" />
-            </div>
           </div>
         </div>
       </header>
 
       {/* داشبورد فرماندهی فضایی (Spatial Command Deck) */}
       <div className="max-w-[1720px] mx-auto px-3 lg:px-8 pt-4 space-y-3">
-        {/* نوار سوییچ ۴ محیط کاری (Workspaces) */}
+        {/* نوار سوییچ ۴ محیط کاری */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-1.5 rounded-2xl bg-[#040711]/90 border border-white/15">
           {WORKSPACES.map((ws) => {
             const Icon = ws.icon;
@@ -243,19 +269,23 @@ export default function TopNav() {
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
-                <span className="truncate">{lang === "fa" ? ws.fa : ws.en}</span>
+                <span className="truncate">
+                  {lang === "fa" ? ws.fa : ws.en}
+                </span>
               </button>
             );
           })}
         </div>
 
-        {/* کارت هولوگرافیک آمار پرتفوی، گیج‌های SVG و دکمه‌های شبیه‌ساز بازار */}
+        {/* کارت هولوگرافیک آمار پرتفوی (بدون حلقه گیج‌کننده قبلی) */}
         <div className="cyber-card rounded-2xl border border-white/15 p-3.5 lg:p-4 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 flex-1">
-            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-emerald-500/25 relative overflow-hidden">
+            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-emerald-500/25">
               <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
                 <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{lang === "fa" ? "ارزش کل پرتفوی" : "Total Net Worth"}</span>
+                <span>
+                  {lang === "fa" ? "ارزش کل پرتفوی" : "Total Net Worth"}
+                </span>
               </div>
               <div className="font-mono font-black text-base sm:text-lg text-white mt-1">
                 $
@@ -272,7 +302,9 @@ export default function TopNav() {
             <div className="p-3 rounded-xl bg-[#03060C]/90 border border-cyan-500/25">
               <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{lang === "fa" ? "سود خالص لحظه‌ای" : "Unrealized PnL"}</span>
+                <span>
+                  {lang === "fa" ? "سود خالص لحظه‌ای" : "Unrealized PnL"}
+                </span>
               </div>
               <div
                 className={`font-mono font-black text-base sm:text-lg mt-1 ${
@@ -307,40 +339,33 @@ export default function TopNav() {
               </div>
             </div>
 
-            {/* گیج دایره‌ای SVG امتیاز هوش مصنوعی */}
-            <div className="p-2.5 rounded-xl bg-[#03060C]/90 border border-purple-500/25 flex items-center justify-between">
-              <div>
-                <div className="text-[11px] text-slate-400">
-                  {lang === "fa" ? "دقت سیگنال AI" : "AI Alpha Confidence"}
+            {/* کارت چهارم: اکولایزر عصبی هوش مصنوعی (جایگزین آن دایره نیمه‌پر قبلی) */}
+            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-purple-500/25 flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-slate-400">
+                  {lang === "fa" ? "موتور سیگنال AI" : "AI Neural Confidence"}
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-400/30 font-bold">
+                  ACTIVE
+                </span>
+              </div>
+              <div className="flex items-end justify-between mt-1.5">
+                <div>
+                  <div className="font-mono font-black text-base sm:text-lg text-purple-300">
+                    94.8%
+                  </div>
+                  <div className="text-[10px] font-mono text-emerald-400">
+                    Sharpe: 3.48
+                  </div>
                 </div>
-                <div className="font-mono font-black text-base text-purple-300 mt-1">
-                  94.8%
-                </div>
-                <div className="text-[10px] font-mono text-emerald-400">
-                  Sharpe: 3.48
+                <div className="flex items-end gap-1 h-7">
+                  <span className="w-1.5 h-3 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="w-1.5 h-5 rounded-full bg-cyan-400 animate-pulse" />
+                  <span className="w-1.5 h-7 rounded-full bg-purple-400 animate-pulse" />
+                  <span className="w-1.5 h-6 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="w-1.5 h-7 rounded-full bg-cyan-400 animate-pulse" />
                 </div>
               </div>
-              <svg className="w-12 h-12 shrink-0 -rotate-90" viewBox="0 0 36 36">
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="14"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.08)"
-                  strokeWidth="3.5"
-                />
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="14"
-                  fill="none"
-                  stroke="#00F0FF"
-                  strokeWidth="3.5"
-                  strokeDasharray="88"
-                  strokeDashoffset="6"
-                  strokeLinecap="round"
-                />
-              </svg>
             </div>
           </div>
 
@@ -391,7 +416,9 @@ export default function TopNav() {
         {lastNotification && (
           <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-400/40 text-emerald-100 text-xs font-mono flex items-center justify-between">
             <span>{lastNotification}</span>
-            <span className="text-[10px] text-cyan-300 font-bold">QUANT TELEMETRY</span>
+            <span className="text-[10px] text-cyan-300 font-bold">
+              QUANT TELEMETRY
+            </span>
           </div>
         )}
       </div>

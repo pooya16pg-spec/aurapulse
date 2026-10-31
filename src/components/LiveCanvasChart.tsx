@@ -48,32 +48,27 @@ export default function LiveCanvasChart() {
     activeAsset.candlesByTf[timeframe] || activeAsset.candlesByTf["15M"];
   const visibleCandles = allTfCandles.slice(-zoomCount);
 
-  // ابعاد برداری استاندارد SVG (کاملاً مستقل از پیکسل و ضد خراب شدن در زوم و اندروید)
-  const W = 920;
-  const H = 420;
-  const padL = 16;
-  const padR = 86;
-  const padT = 22;
-  const priceH = 265;
-  const volTop = padT + priceH + 18;
-  const volH = 78;
-  const plotW = W - padL - padR;
+  const W = 800;
+  const H = 360;
+  const padT = 18;
+  const priceH = 240;
+  const volTop = padT + priceH + 14;
+  const volH = 72;
 
   const highs = visibleCandles.map((c) => c.high);
   const lows = visibleCandles.map((c) => c.low);
   const rawMax = Math.max(...highs);
   const rawMin = Math.min(...lows);
   const rawSpan = Math.max(rawMax - rawMin, activeAsset.stepSize * 4);
-  const maxP = rawMax + rawSpan * 0.15;
-  const minP = rawMin - rawSpan * 0.15;
+  const maxP = rawMax + rawSpan * 0.14;
+  const minP = rawMin - rawSpan * 0.14;
   const rangeP = Math.max(maxP - minP, 0.0001);
   const maxVol = Math.max(...visibleCandles.map((c) => c.volume), 1);
 
   const priceToY = (p: number) => padT + ((maxP - p) / rangeP) * priceH;
-  const stepX = plotW / Math.max(visibleCandles.length, 1);
-  const candleW = Math.max(6, Math.min(20, stepX * 0.62));
+  const stepX = W / Math.max(visibleCandles.length, 1);
+  const candleW = Math.max(6, Math.min(18, stepX * 0.6));
 
-  // محاسبه مختصات کندل‌ها، EMA و باند بولینگر
   let ema9 = visibleCandles[0]?.close || activeAsset.price;
   let ema21 = visibleCandles[0]?.close || activeAsset.price;
   const k9 = 2 / 10;
@@ -86,7 +81,7 @@ export default function LiveCanvasChart() {
   const closePoints: { x: number; y: number }[] = [];
 
   visibleCandles.forEach((c, idx) => {
-    const x = Number((padL + idx * stepX + stepX / 2).toFixed(1));
+    const x = Number((idx * stepX + stepX / 2).toFixed(1));
     const yClose = Number(priceToY(c.close).toFixed(1));
     closePoints.push({ x, y: yClose });
 
@@ -120,7 +115,7 @@ export default function LiveCanvasChart() {
 
   const rsiPoints = visibleCandles
     .map((c, idx) => {
-      const x = (padL + idx * stepX + stepX / 2).toFixed(1);
+      const x = (idx * stepX + stepX / 2).toFixed(1);
       const y = (volTop + ((100 - c.rsi) / 100) * volH).toFixed(1);
       return `${x},${y}`;
     })
@@ -128,11 +123,16 @@ export default function LiveCanvasChart() {
 
   const lastCandle = visibleCandles[visibleCandles.length - 1];
   const lastY = lastCandle ? priceToY(lastCandle.close) : padT + priceH / 2;
+  const lastRatioPct = Math.max(5, Math.min(92, (lastY / H) * 100));
 
   const inspected =
     hoverIdx !== null && visibleCandles[hoverIdx]
       ? visibleCandles[hoverIdx]
       : lastCandle;
+
+  const priceLabels = [0, 0.25, 0.5, 0.75, 1].map(
+    (r) => maxP - rangeP * r
+  );
 
   return (
     <div
@@ -191,7 +191,7 @@ export default function LiveCanvasChart() {
               {activeAsset.name[lang]}
             </span>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
-              SVG VECTOR HD
+              CRISP VECTOR HD
             </span>
           </div>
           <div className="flex items-baseline gap-2.5 mt-1">
@@ -223,7 +223,6 @@ export default function LiveCanvasChart() {
           </div>
         </div>
 
-        {/* دکمه‌های اندیکاتورها و زوم */}
         <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
           <button
             onClick={() =>
@@ -338,309 +337,281 @@ export default function LiveCanvasChart() {
         </div>
       )}
 
-      {/* نمودار برداری Pure SVG با کیفیت بی‌نهایت در موبایل و دسکتاپ */}
+      {/* بوم ترکیبی: گرافیک برداری SVG + ستون قیمت و زمان HTML بدون کشیدگی */}
       <div
         dir="ltr"
         className="relative w-full rounded-xl bg-[#020409] border border-white/15 overflow-hidden select-none"
       >
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className="w-full h-[300px] sm:h-[385px] block"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            <linearGradient id="areaGradUp" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10B981" stopOpacity="0.45" />
-              <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-            </linearGradient>
-            <linearGradient id="areaGradDown" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.45" />
-              <stop offset="100%" stopColor="#F43F5E" stopOpacity="0.0" />
-            </linearGradient>
-            <linearGradient id="bbGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00F0FF" stopOpacity="0.10" />
-              <stop offset="50%" stopColor="#A855F7" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="#00F0FF" stopOpacity="0.10" />
-            </linearGradient>
-          </defs>
+        <div className="flex items-stretch h-[300px] sm:h-[365px]">
+          {/* بخش ترسیم برداری */}
+          <div className="relative flex-1 min-w-0">
+            <svg
+              viewBox={`0 0 ${W} ${H}`}
+              className="w-full h-full block"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="areaGradUp" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10B981" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+                </linearGradient>
+                <linearGradient id="areaGradDown" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#F43F5E" stopOpacity="0.0" />
+                </linearGradient>
+                <linearGradient id="bbGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#00F0FF" stopOpacity="0.12" />
+                  <stop offset="50%" stopColor="#A855F7" stopOpacity="0.05" />
+                  <stop offset="100%" stopColor="#00F0FF" stopOpacity="0.12" />
+                </linearGradient>
+              </defs>
 
-          {/* ۱. خطوط افقی شبکه قیمت */}
-          {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
-            const y = padT + priceH * ratio;
-            const pVal = maxP - rangeP * ratio;
-            return (
-              <g key={`grid-${i}`}>
-                <line
-                  x1={padL}
-                  y1={y}
-                  x2={W - padR}
-                  y2={y}
-                  stroke="rgba(255,255,255,0.06)"
-                  strokeWidth="1"
-                />
-                <text
-                  x={W - padR + 8}
-                  y={y + 4}
-                  fill="rgba(148,163,184,0.85)"
-                  fontSize="11"
-                  fontFamily="JetBrains Mono, monospace"
-                >
-                  ${pVal.toFixed(pVal < 500 ? 2 : 0)}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* ۲. کانال باندهای بولینگر */}
-          {showBollinger && bbUpper.length > 2 && (
-            <g>
-              <polygon points={bbPolygonPoints} fill="url(#bbGrad)" />
-              <polyline
-                fill="none"
-                stroke="rgba(0, 240, 255, 0.35)"
-                strokeWidth="1.3"
-                points={bbUpper.map((p) => `${p.x},${p.y}`).join(" ")}
-              />
-              <polyline
-                fill="none"
-                stroke="rgba(0, 240, 255, 0.35)"
-                strokeWidth="1.3"
-                points={bbLower.map((p) => `${p.x},${p.y}`).join(" ")}
-              />
-            </g>
-          )}
-
-          {/* ۳. رسم کندل‌استیک‌ها یا منحنی نئونی */}
-          {chartMode === "CANDLE" ? (
-            visibleCandles.map((c, idx) => {
-              const cx = padL + idx * stepX + stepX / 2;
-              const isUp = c.close >= c.open;
-              const color = isUp ? "#10B981" : "#F43F5E";
-              const highY = priceToY(c.high);
-              const lowY = priceToY(c.low);
-              const openY = priceToY(c.open);
-              const closeY = priceToY(c.close);
-              const bodyTop = Math.min(openY, closeY);
-              const bodyH = Math.max(Math.abs(closeY - openY), 3);
-
-              return (
-                <g key={`candle-${idx}`}>
+              {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+                const y = padT + priceH * ratio;
+                return (
                   <line
-                    x1={cx}
-                    y1={highY}
-                    x2={cx}
-                    y2={lowY}
-                    stroke={color}
-                    strokeWidth="1.8"
+                    key={`grid-${i}`}
+                    x1={0}
+                    y1={y}
+                    x2={W}
+                    y2={y}
+                    stroke="rgba(255,255,255,0.06)"
+                    strokeWidth="1"
                   />
-                  <rect
-                    x={cx - candleW / 2}
-                    y={bodyTop}
-                    width={candleW}
-                    height={bodyH}
-                    rx="1.5"
-                    fill={color}
+                );
+              })}
+
+              {showBollinger && bbUpper.length > 2 && (
+                <g>
+                  <polygon points={bbPolygonPoints} fill="url(#bbGrad)" />
+                  <polyline
+                    fill="none"
+                    stroke="rgba(0, 240, 255, 0.4)"
+                    strokeWidth="1.4"
+                    points={bbUpper.map((p) => `${p.x},${p.y}`).join(" ")}
                   />
-                  {showAISignals && c.signal && (
-                    <g>
-                      <rect
-                        x={cx - 18}
-                        y={c.signal === "BUY" ? lowY + 4 : highY - 18}
-                        width="36"
-                        height="13"
-                        rx="3"
-                        fill={
-                          c.signal === "BUY"
-                            ? "rgba(0, 240, 255, 0.22)"
-                            : "rgba(245, 158, 11, 0.25)"
-                        }
-                        stroke={c.signal === "BUY" ? "#00F0FF" : "#F59E0B"}
-                        strokeWidth="0.8"
-                      />
-                      <text
-                        x={cx}
-                        y={c.signal === "BUY" ? lowY + 13 : highY - 9}
-                        textAnchor="middle"
-                        fill={c.signal === "BUY" ? "#00F0FF" : "#FDE047"}
-                        fontSize="8.5"
-                        fontWeight="bold"
-                        fontFamily="JetBrains Mono, monospace"
-                      >
-                        {c.signal === "BUY" ? "▲BUY" : "▼SELL"}
-                      </text>
-                    </g>
-                  )}
+                  <polyline
+                    fill="none"
+                    stroke="rgba(0, 240, 255, 0.4)"
+                    strokeWidth="1.4"
+                    points={bbLower.map((p) => `${p.x},${p.y}`).join(" ")}
+                  />
                 </g>
-              );
-            })
-          ) : (
-            <g>
-              <polygon
-                points={areaPolygonPoints}
-                fill={isPositive ? "url(#areaGradUp)" : "url(#areaGradDown)"}
-              />
-              <polyline
-                fill="none"
-                stroke={isPositive ? "#10B981" : "#F43F5E"}
-                strokeWidth="3"
-                points={areaLinePoints}
-              />
-            </g>
-          )}
+              )}
 
-          {/* ۴. میانگین‌های متحرک EMA-9 و EMA-21 */}
-          {showEMA && (
-            <g>
-              <polyline
-                fill="none"
-                stroke="#00F0FF"
-                strokeWidth="2"
-                points={ema9Points.join(" ")}
-              />
-              <polyline
-                fill="none"
-                stroke="#A855F7"
-                strokeWidth="1.8"
-                strokeDasharray="4 3"
-                points={ema21Points.join(" ")}
-              />
-            </g>
-          )}
+              {chartMode === "CANDLE" ? (
+                visibleCandles.map((c, idx) => {
+                  const cx = idx * stepX + stepX / 2;
+                  const isUp = c.close >= c.open;
+                  const color = isUp ? "#10B981" : "#F43F5E";
+                  const highY = priceToY(c.high);
+                  const lowY = priceToY(c.low);
+                  const openY = priceToY(c.open);
+                  const closeY = priceToY(c.close);
+                  const bodyTop = Math.min(openY, closeY);
+                  const bodyH = Math.max(Math.abs(closeY - openY), 3);
 
-          {/* ۵. خط افقی آخرین قیمت + تگ زنده قیمت */}
-          {lastCandle && (
-            <g>
+                  return (
+                    <g key={`candle-${idx}`}>
+                      <line
+                        x1={cx}
+                        y1={highY}
+                        x2={cx}
+                        y2={lowY}
+                        stroke={color}
+                        strokeWidth="1.8"
+                      />
+                      <rect
+                        x={cx - candleW / 2}
+                        y={bodyTop}
+                        width={candleW}
+                        height={bodyH}
+                        rx="1.5"
+                        fill={color}
+                      />
+                    </g>
+                  );
+                })
+              ) : (
+                <g>
+                  <polygon
+                    points={areaPolygonPoints}
+                    fill={
+                      isPositive ? "url(#areaGradUp)" : "url(#areaGradDown)"
+                    }
+                  />
+                  <polyline
+                    fill="none"
+                    stroke={isPositive ? "#10B981" : "#F43F5E"}
+                    strokeWidth="2.8"
+                    points={areaLinePoints}
+                  />
+                </g>
+              )}
+
+              {showEMA && (
+                <g>
+                  <polyline
+                    fill="none"
+                    stroke="#00F0FF"
+                    strokeWidth="2"
+                    points={ema9Points.join(" ")}
+                  />
+                  <polyline
+                    fill="none"
+                    stroke="#A855F7"
+                    strokeWidth="1.8"
+                    strokeDasharray="4 3"
+                    points={ema21Points.join(" ")}
+                  />
+                </g>
+              )}
+
+              {lastCandle && (
+                <line
+                  x1={0}
+                  y1={lastY}
+                  x2={W}
+                  y2={lastY}
+                  stroke={isPositive ? "#10B981" : "#F43F5E"}
+                  strokeWidth="1.2"
+                  strokeDasharray="4 4"
+                />
+              )}
+
               <line
-                x1={padL}
-                y1={lastY}
-                x2={W - padR}
-                y2={lastY}
-                stroke={isPositive ? "#10B981" : "#F43F5E"}
-                strokeWidth="1.2"
-                strokeDasharray="4 4"
+                x1={0}
+                y1={volTop - 6}
+                x2={W}
+                y2={volTop - 6}
+                stroke="rgba(255,255,255,0.12)"
+                strokeWidth="1"
               />
-              <rect
-                x={W - padR + 2}
-                y={lastY - 10}
-                width={padR - 4}
-                height="20"
-                rx="4"
-                fill={isPositive ? "#10B981" : "#F43F5E"}
+
+              {visibleCandles.map((c, idx) => {
+                const cx = idx * stepX + stepX / 2;
+                const isUp = c.close >= c.open;
+                const barH = (c.volume / maxVol) * (volH - 8);
+                const barY = volTop + volH - barH;
+                return (
+                  <rect
+                    key={`vol-${idx}`}
+                    x={cx - candleW / 2}
+                    y={barY}
+                    width={candleW}
+                    height={barH}
+                    rx="1"
+                    fill={
+                      isUp
+                        ? "rgba(16, 185, 129, 0.35)"
+                        : "rgba(244, 63, 94, 0.35)"
+                    }
+                  />
+                );
+              })}
+
+              <polyline
+                fill="none"
+                stroke="#C084FC"
+                strokeWidth="1.8"
+                points={rsiPoints}
               />
-              <text
-                x={W - padR + (padR - 4) / 2}
-                y={lastY + 4}
-                textAnchor="middle"
-                fill="#020408"
-                fontSize="10.5"
-                fontWeight="bold"
-                fontFamily="JetBrains Mono, monospace"
+
+              {hoverIdx !== null && visibleCandles[hoverIdx] && (
+                <line
+                  x1={hoverIdx * stepX + stepX / 2}
+                  y1={0}
+                  x2={hoverIdx * stepX + stepX / 2}
+                  y2={H}
+                  stroke="#00F0FF"
+                  strokeWidth="1.4"
+                  strokeDasharray="3 3"
+                />
+              )}
+
+              {visibleCandles.map((_, idx) => (
+                <rect
+                  key={`hit-${idx}`}
+                  x={idx * stepX}
+                  y={0}
+                  width={stepX}
+                  height={H}
+                  fill="transparent"
+                  className="cursor-crosshair"
+                  onMouseEnter={() => setHoverIdx(idx)}
+                  onTouchStart={() => setHoverIdx(idx)}
+                />
+              ))}
+            </svg>
+
+            {/* تگ‌های سیگنال AI با فونت کاملاً صاف HTML بدون کشیدگی */}
+            {showAISignals &&
+              visibleCandles.map((c, idx) => {
+                if (!c.signal) return null;
+                const leftPct = ((idx + 0.5) / visibleCandles.length) * 100;
+                const yPos =
+                  c.signal === "BUY" ? priceToY(c.low) : priceToY(c.high);
+                const topPct = Math.max(
+                  6,
+                  Math.min(62, (yPos / H) * 100 + (c.signal === "BUY" ? 3 : -6))
+                );
+                return (
+                  <div
+                    key={`sig-${idx}`}
+                    style={{ left: `${leftPct}%`, top: `${topPct}%` }}
+                    className={`pointer-events-none absolute -translate-x-1/2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border shadow-md ${
+                      c.signal === "BUY"
+                        ? "bg-cyan-500/25 border-cyan-400 text-cyan-200"
+                        : "bg-amber-500/25 border-amber-400 text-amber-200"
+                    }`}
+                  >
+                    {c.signal === "BUY" ? "▲BUY" : "▼SELL"}
+                  </div>
+                );
+              })}
+
+            <div className="pointer-events-none absolute left-2.5 bottom-14 text-[9px] font-mono text-purple-300/90 bg-[#020409]/80 px-1.5 py-0.5 rounded">
+              VOLUME & RSI(14)
+            </div>
+          </div>
+
+          {/* ستون سمت راست قیمت‌ها (HTML خالص برای وضوح ۱۰۰٪ روی موبایل و دسکتاپ) */}
+          <div className="relative w-16 sm:w-20 border-l border-white/10 bg-[#03060E] flex flex-col justify-between py-3 px-1.5 font-mono text-[10px] text-slate-400">
+            {priceLabels.map((val, i) => (
+              <div key={i} className="text-right truncate">
+                ${val.toFixed(val < 500 ? 2 : 0)}
+              </div>
+            ))}
+            <div className="text-[9px] text-purple-400 text-right border-t border-white/10 pt-1">
+              RSI 14
+            </div>
+
+            {lastCandle && (
+              <div
+                style={{ top: `${lastRatioPct}%` }}
+                className={`absolute left-0.5 right-0.5 -translate-y-1/2 py-0.5 px-1 rounded text-[10px] font-bold text-center shadow-lg ${
+                  isPositive
+                    ? "bg-emerald-400 text-slate-950"
+                    : "bg-rose-500 text-white"
+                }`}
               >
                 ${lastCandle.close.toFixed(lastCandle.close < 500 ? 2 : 0)}
-              </text>
-            </g>
-          )}
+              </div>
+            )}
+          </div>
+        </div>
 
-          {/* ۶. زیرنمودار پایین: هیستوگرام حجم معاملات + منحنی RSI */}
-          <line
-            x1={padL}
-            y1={volTop - 6}
-            x2={W - padR}
-            y2={volTop - 6}
-            stroke="rgba(255,255,255,0.12)"
-            strokeWidth="1"
-          />
-          <text
-            x={padL + 6}
-            y={volTop + 12}
-            fill="rgba(168,85,247,0.9)"
-            fontSize="10"
-            fontFamily="JetBrains Mono, monospace"
-          >
-            VOLUME & RSI(14) OSCILLATOR
-          </text>
-
-          {visibleCandles.map((c, idx) => {
-            const cx = padL + idx * stepX + stepX / 2;
-            const isUp = c.close >= c.open;
-            const barH = (c.volume / maxVol) * (volH - 12);
-            const barY = volTop + volH - barH;
-            return (
-              <g key={`vol-${idx}`}>
-                <rect
-                  x={cx - candleW / 2}
-                  y={barY}
-                  width={candleW}
-                  height={barH}
-                  rx="1"
-                  fill={
-                    isUp
-                      ? "rgba(16, 185, 129, 0.35)"
-                      : "rgba(244, 63, 94, 0.35)"
-                  }
-                />
-                {idx % Math.max(1, Math.floor(visibleCandles.length / 6)) ===
-                  0 && (
-                  <text
-                    x={cx}
-                    y={H - 6}
-                    textAnchor="middle"
-                    fill="rgba(148,163,184,0.7)"
-                    fontSize="10"
-                    fontFamily="JetBrains Mono, monospace"
-                  >
-                    {c.time}
-                  </text>
-                )}
-              </g>
-            );
-          })}
-
-          <polyline
-            fill="none"
-            stroke="#C084FC"
-            strokeWidth="1.8"
-            points={rsiPoints}
-          />
-
-          {/* ۷. خط راهنمای تعاملی (Crosshair) هنگام لمس یا هاور */}
-          {hoverIdx !== null && visibleCandles[hoverIdx] && (
-            <g>
-              <line
-                x1={padL + hoverIdx * stepX + stepX / 2}
-                y1={padT}
-                x2={padL + hoverIdx * stepX + stepX / 2}
-                y2={volTop + volH}
-                stroke="#00F0FF"
-                strokeWidth="1.2"
-                strokeDasharray="3 3"
-              />
-              <circle
-                cx={padL + hoverIdx * stepX + stepX / 2}
-                cy={priceToY(visibleCandles[hoverIdx].close)}
-                r="5"
-                fill="#00F0FF"
-                stroke="#020408"
-                strokeWidth="2"
-              />
-            </g>
-          )}
-
-          {/* ۸. ستون‌های نامرئی لمسی برای کارکرد ۱۰۰٪ دقیق در اندروید و دسکتاپ */}
-          {visibleCandles.map((_, idx) => (
-            <rect
-              key={`hit-${idx}`}
-              x={padL + idx * stepX}
-              y={0}
-              width={stepX}
-              height={H}
-              fill="transparent"
-              className="cursor-crosshair"
-              onMouseEnter={() => setHoverIdx(idx)}
-              onTouchStart={() => setHoverIdx(idx)}
-            />
-          ))}
-        </svg>
+        {/* نوار افقی زمان در پایین نمودار */}
+        <div className="flex items-center justify-between px-3 py-1.5 border-t border-white/10 bg-[#03060E] font-mono text-[10px] text-slate-400 pr-20">
+          {visibleCandles
+            .filter(
+              (_, idx) =>
+                idx % Math.max(1, Math.floor(visibleCandles.length / 5)) === 0
+            )
+            .map((c, i) => (
+              <span key={i}>{c.time}</span>
+            ))}
+        </div>
       </div>
     </div>
   );

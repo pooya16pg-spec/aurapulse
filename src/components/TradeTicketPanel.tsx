@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuraStore } from "../store/useAuraStore";
+import SmartAssetImage from "./SmartAssetImage";
 import {
   ArrowDownUp,
   Cpu,
@@ -83,10 +84,9 @@ export default function TradeTicketPanel() {
   return (
     <div
       dir={lang === "fa" ? "rtl" : "ltr"}
-      className="space-y-4 flex flex-col justify-between h-full"
+      className="space-y-4 flex flex-col justify-between h-full min-w-0"
     >
-      {/* کارت ثبت سفارش حرفه‌ای */}
-      <div className="glass-card rounded-2xl border border-white/10 p-4 space-y-3.5">
+      <div className="cyber-card rounded-2xl border border-white/15 p-4 space-y-3.5">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-white flex items-center gap-2">
             <ArrowDownUp className="w-4 h-4 text-emerald-400" />
@@ -106,8 +106,7 @@ export default function TradeTicketPanel() {
           )}
         </div>
 
-        {/* تب خرید و فروش */}
-        <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-[#04060A] border border-white/10 font-mono text-xs">
+        <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-[#020408] border border-white/10 font-mono text-xs">
           <button
             type="button"
             onClick={() => setSide("BUY")}
@@ -132,14 +131,15 @@ export default function TradeTicketPanel() {
           </button>
         </div>
 
-        {/* انتخابگر اهرم معاملاتی (Leverage) */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[11px] text-slate-400">
             <span className="flex items-center gap-1">
               <Sliders className="w-3 h-3 text-cyan-400" />
               {lang === "fa" ? "اهرم معاملاتی (Leverage):" : "Margin Leverage:"}
             </span>
-            <span className="font-mono font-bold text-cyan-400">{leverage}x</span>
+            <span className="font-mono font-bold text-cyan-400">
+              {leverage}x
+            </span>
           </div>
           <div className="grid grid-cols-5 gap-1.5 font-mono text-[11px]">
             {LEVERAGES.map((lev) => (
@@ -163,11 +163,15 @@ export default function TradeTicketPanel() {
           <div>
             <div className="flex justify-between text-[11px] text-slate-400 mb-1">
               <span>
-                {lang === "fa" ? "مارجین ورودی (USD):" : "Collateral Margin (USD):"}
+                {lang === "fa"
+                  ? "مارجین ورودی (USD):"
+                  : "Collateral Margin (USD):"}
               </span>
               <span className="font-mono text-slate-300">
                 {side === "BUY"
-                  ? `Avail: $${balanceUSD.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                  ? `Avail: $${balanceUSD.toLocaleString("en-US", {
+                      maximumFractionDigits: 0,
+                    })}`
                   : `Holdings: ${userUnits}`}
               </span>
             </div>
@@ -177,7 +181,7 @@ export default function TradeTicketPanel() {
                 step="any"
                 value={usdInput}
                 onChange={(e) => setUsdInput(e.target.value)}
-                className="w-full rounded-xl bg-[#04060A] border border-white/15 focus:border-emerald-400 px-3.5 py-2 font-mono text-sm text-white focus:outline-none"
+                className="w-full rounded-xl bg-[#020408] border border-white/15 focus:border-emerald-400 px-3.5 py-2 font-mono text-sm text-white focus:outline-none"
               />
               <span className="absolute left-3 font-mono text-xs text-slate-400">
                 USD
@@ -198,11 +202,12 @@ export default function TradeTicketPanel() {
             ))}
           </div>
 
-          <div className="p-2.5 rounded-xl bg-[#04060A]/90 border border-white/5 space-y-1 text-[11px] font-mono">
+          <div className="p-2.5 rounded-xl bg-[#020408]/90 border border-white/5 space-y-1 text-[11px] font-mono">
             <div className="flex justify-between text-slate-400">
               <span>{lang === "fa" ? "حجم کل پوزیشن:" : "Position Size:"}</span>
               <span className="text-white font-semibold">
-                {estimatedUnits} {selectedSymbol.split("/")[0]} (${buyingPowerUSD.toLocaleString("en-US")})
+                {estimatedUnits} {selectedSymbol.split("/")[0]} ($
+                {buyingPowerUSD.toLocaleString("en-US")})
               </span>
             </div>
             <div className="flex justify-between text-slate-400">
@@ -253,23 +258,22 @@ export default function TradeTicketPanel() {
         )}
       </div>
 
-      {/* رادار چندعاملی هوش مصنوعی کوانتومی */}
-      <div className="glass-card rounded-2xl border border-white/10 p-4 space-y-3">
-        <div className="relative h-24 w-full rounded-xl overflow-hidden bg-gradient-to-br from-emerald-500/20 via-slate-900 to-cyan-500/20 border border-white/10 flex items-center justify-center">
-          <img
-            src="/aurapulse/assets/quant-core.webp"
+      {/* رادار چندعاملی هوش مصنوعی کوانتومی با پشتیبانی هوشمند از عکس quant-core */}
+      <div className="cyber-card rounded-2xl border border-white/15 p-4 space-y-3">
+        <div className="relative h-28 w-full rounded-xl overflow-hidden bg-gradient-to-br from-emerald-500/20 via-[#040814] to-cyan-500/25 border border-white/15 flex items-center justify-center">
+          <SmartAssetImage
+            baseName="quant-core"
             alt="AI Quant Risk Engine"
-            className="w-full h-full object-cover opacity-85"
-            onError={(e) => {
-              const target = e.currentTarget;
-              if (target.src.includes("/aurapulse/assets/")) {
-                target.src = "/assets/quant-core.webp";
-              } else {
-                target.style.display = "none";
-              }
-            }}
+            className="w-full h-full object-cover opacity-90"
+            fallback={
+              <div className="w-full h-full flex items-center justify-center relative">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-cyan-400/50 animate-pulse flex items-center justify-center">
+                  <Cpu className="w-8 h-8 text-cyan-300" />
+                </div>
+              </div>
+            }
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#04060A] via-[#04060A]/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#020408] via-[#020408]/30 to-transparent" />
           <div className="absolute bottom-2 right-3 left-3 flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-xs font-bold text-white">
               <Cpu className="w-4 h-4 text-cyan-400" />
@@ -277,8 +281,8 @@ export default function TradeTicketPanel() {
                 ? "رادار هوش مصنوعی کوانتومی"
                 : "Neural Quant Alpha Radar"}
             </span>
-            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-              94.2% CONFIDENCE
+            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-200 border border-emerald-400/40 font-bold">
+              94.8% CONFIDENCE
             </span>
           </div>
         </div>
@@ -288,10 +292,15 @@ export default function TradeTicketPanel() {
             <span>
               {lang === "fa" ? "جریان سفارشات نهنگ‌ها:" : "Whale Order Flow:"}
             </span>
-            <span className="font-mono text-emerald-400">82% Bullish</span>
+            <span className="font-mono text-emerald-400">
+              {activeAsset.whaleScore}% Bullish
+            </span>
           </div>
-          <div className="w-full h-1.5 rounded-full bg-[#04060A] overflow-hidden">
-            <div className="h-full bg-emerald-400 w-[82%]" />
+          <div className="w-full h-1.5 rounded-full bg-[#020408] overflow-hidden">
+            <div
+              className="h-full bg-emerald-400 transition-all duration-500"
+              style={{ width: `${activeAsset.whaleScore}%` }}
+            />
           </div>
 
           <div className="flex justify-between text-slate-300 pt-1">
@@ -302,7 +311,7 @@ export default function TradeTicketPanel() {
               {activeAsset.volatilityRisk} / 100
             </span>
           </div>
-          <div className="w-full h-1.5 rounded-full bg-[#04060A] overflow-hidden">
+          <div className="w-full h-1.5 rounded-full bg-[#020408] overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-500"
               style={{ width: `${activeAsset.volatilityRisk}%` }}
