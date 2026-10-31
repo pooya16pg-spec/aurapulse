@@ -53,6 +53,9 @@ export default function TopNav() {
             <span className={`hidden sm:inline text-[10px] font-mono px-1.5 py-0.5 rounded border ${isBinanceConnected ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30" : "bg-amber-400/10 text-amber-200 border-amber-400/30"}`}>
               {isBinanceConnected ? "BINANCE FEED" : "SIMULATED"}
             </span>
+            <span className={`sm:hidden text-[9px] font-mono px-1.5 py-1 rounded border ${isBinanceConnected ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30" : "bg-amber-400/10 text-amber-200 border-amber-400/30"}`}>
+              {isBinanceConnected ? "FEED" : "DEMO"}
+            </span>
           </div>
 
           <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-xs text-slate-400 font-mono">
