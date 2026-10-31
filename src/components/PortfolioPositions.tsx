@@ -51,8 +51,8 @@ export default function PortfolioPositions() {
             { label: lang === "fa" ? "ارزش خالص" : "Account equity", value: `${netWorthUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: "text-white" },
             { label: lang === "fa" ? "موجودی نقد" : "Cash balance", value: `${balanceUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: "text-cyan-300" },
             { label: lang === "fa" ? "ارزش موقعیت‌ها" : "Position value", value: `${totalHoldingsUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: "text-white" },
-            { label: lang === "fa" ? "سود/زیان باز" : "Unrealized P&L", value: `${unrealizedPnlUSD >= 0 ? "+" : "-"}${Math.abs(unrealizedPnlUSD).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: pnlTone(unrealizedPnlUSD) },
-            { label: lang === "fa" ? "سود/زیان تحقق‌یافته" : "Realized P&L", value: `${realizedPnlUSD >= 0 ? "+" : "-"}${Math.abs(realizedPnlUSD).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: pnlTone(realizedPnlUSD) },
+            { label: lang === "fa" ? "سود/زیان باز" : "Unrealized P&L", value: `${unrealizedPnlUSD >= 0 ? "+$" : "-$"}${Math.abs(unrealizedPnlUSD).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: pnlTone(unrealizedPnlUSD) },
+            { label: lang === "fa" ? "سود/زیان تحقق‌یافته" : "Realized P&L", value: `${realizedPnlUSD >= 0 ? "+$" : "-$"}${Math.abs(realizedPnlUSD).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: pnlTone(realizedPnlUSD) },
           ].map((item) => (
             <div key={item.label} className="rounded-xl border border-white/10 bg-carbon/70 p-3 min-w-0">
               <div className="text-[10px] text-slate-500">{item.label}</div>
@@ -174,6 +174,7 @@ export default function PortfolioPositions() {
         </div>
 
         <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+          {orders.length === 0 && <p className="py-6 text-center text-xs text-slate-500">{lang === "fa" ? "هنوز سفارشی ثبت نشده است." : "No paper orders yet."}</p>}
           {orders.map((ord) => (
             <div
               key={ord.id}
@@ -207,7 +208,8 @@ export default function PortfolioPositions() {
                 <div className="text-slate-200">
                   @${ord.executionPrice.toLocaleString("en-US")}
                 </div>
-                <div className="text-[10px] text-slate-500">{lang === "fa" ? "کارمزد" : "Fee"}: ${Number(ord.feeUSD || 0).toFixed(2)}</div>\n                {typeof ord.realizedPnlUSD === "number" && <div className={`text-[10px] ${pnlTone(ord.realizedPnlUSD)}`}>P&L {ord.realizedPnlUSD >= 0 ? "+" : "-"}${Math.abs(ord.realizedPnlUSD).toFixed(2)}</div>}
+                <div className="text-[10px] text-slate-500">{lang === "fa" ? "کارمزد" : "Fee"}: ${Number(ord.feeUSD || 0).toFixed(2)}</div>
+                {typeof ord.realizedPnlUSD === "number" && <div className={`text-[10px] ${pnlTone(ord.realizedPnlUSD)}`}>P&L {ord.realizedPnlUSD >= 0 ? "+" : "-"}${Math.abs(ord.realizedPnlUSD).toFixed(2)}</div>}
               </div>
             </div>
           ))}
