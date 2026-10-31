@@ -674,6 +674,7 @@ const triggerMarketShock = (direction: "PUMP" | "CRASH") => {
 const tickMarket = () => {
   if (!globalState.isLiveStreamActive) return;
   tickCounter++;
+  let botTradePlaced = false;
   setState((state) => {
     const updatedAssets = { ...state.assets };
     const tf = state.timeframe;
@@ -756,7 +757,6 @@ const tickMarket = () => {
     let nextAvgEntryPrices = state.avgEntryPrices;
     let nextBalance = state.balanceUSD;
     let nextLogs = state.aiLogs;
-    let botTradePlaced = false;
 
     if (state.isAutoBotActive && tickCounter % 2 === 0 && state.balanceUSD > 500) {
       const activeSym = state.selectedSymbol;
