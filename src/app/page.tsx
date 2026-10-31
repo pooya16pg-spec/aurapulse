@@ -118,17 +118,17 @@ export default function AuraPulseTerminalPage() {
   const symbols = Object.keys(assets) as AssetSymbol[];
 
   return (
-    <div className={`min-h-screen ${themeClass} flex flex-col overflow-x-hidden`}>
+    <div className={`min-h-[100svh] ${themeClass} flex flex-col overflow-x-clip`}>
       <TopNav />
 
-      <main className="flex-1 max-w-[1720px] w-full mx-auto px-2.5 sm:px-4 lg:px-8 py-4 space-y-5 min-w-0">
+      <main className="flex-1 max-w-[1720px] w-full mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 space-y-4 sm:space-y-5 min-w-0 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         {workspace === "TERMINAL" && (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-              <div className="lg:col-span-6 min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-5 items-stretch">
+              <div className="sm:col-span-2 lg:col-span-6 min-w-0">
                 <LiveCanvasChart />
               </div>
-              <div className="lg:col-span-3 min-w-0">
+              <div className="min-w-0 lg:col-span-3">
                 <OrderBookPanel />
               </div>
               <div className="lg:col-span-3 min-w-0">

@@ -74,7 +74,7 @@ export default function OrderBookPanel() {
       </div>
 
       {/* فروشندگان (Asks) */}
-      <div dir="ltr" className="space-y-1 font-mono text-[11px]">
+      <div dir="ltr" className="space-y-1 font-mono text-[11px] max-h-[210px] overflow-y-auto overscroll-contain pr-1">
         {activeAsset.asks.map((ask, idx) => (
           <button
             key={`ask-${idx}`}
@@ -113,7 +113,7 @@ export default function OrderBookPanel() {
       </div>
 
       {/* خریداران (Bids) */}
-      <div dir="ltr" className="space-y-1 font-mono text-[11px]">
+      <div dir="ltr" className="space-y-1 font-mono text-[11px] max-h-[210px] overflow-y-auto overscroll-contain pr-1">
         {activeAsset.bids.map((bid, idx) => (
           <button
             key={`bid-${idx}`}
