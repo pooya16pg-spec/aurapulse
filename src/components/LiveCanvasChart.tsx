@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   useAuraStore,
   AssetSymbol,
@@ -14,7 +14,6 @@ import {
   RotateCcw,
   Activity,
   CandlestickChart,
-  Layers,
   Sparkles,
 } from "lucide-react";
 
@@ -43,389 +42,104 @@ export default function LiveCanvasChart() {
 
   const activeAsset = assets[selectedSymbol];
   const isPositive = activeAsset.change24h >= 0;
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-  const [canvasSize, setCanvasSize] = useState({ width: 760, height: 380 });
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const updateSize = () => {
-      const rect = el.getBoundingClientRect();
-      if (rect.width > 20 && rect.height > 20) {
-        setCanvasSize((prev) => {
-          if (
-            Math.abs(prev.width - rect.width) < 2 &&
-            Math.abs(prev.height - rect.height) < 2
-          ) {
-            return prev;
-          }
-          return { width: Math.floor(rect.width), height: Math.floor(rect.height) };
-        });
-      }
-    };
-
-    updateSize();
-    const observer = new ResizeObserver(updateSize);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  const allTfCandles = activeAsset.candlesByTf[timeframe] || activeAsset.candlesByTf["15M"];
+  const allTfCandles =
+    activeAsset.candlesByTf[timeframe] || activeAsset.candlesByTf["15M"];
   const visibleCandles = allTfCandles.slice(-zoomCount);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || visibleCandles.length === 0) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+  // ابعاد برداری استاندارد SVG (کاملاً مستقل از پیکسل و ضد خراب شدن در زوم و اندروید)
+  const W = 920;
+  const H = 420;
+  const padL = 16;
+  const padR = 86;
+  const padT = 22;
+  const priceH = 265;
+  const volTop = padT + priceH + 18;
+  const volH = 78;
+  const plotW = W - padL - padR;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = canvasSize.width;
-    const height = canvasSize.height;
-    const isMobile = width < 520;
+  const highs = visibleCandles.map((c) => c.high);
+  const lows = visibleCandles.map((c) => c.low);
+  const rawMax = Math.max(...highs);
+  const rawMin = Math.min(...lows);
+  const rawSpan = Math.max(rawMax - rawMin, activeAsset.stepSize * 4);
+  const maxP = rawMax + rawSpan * 0.15;
+  const minP = rawMin - rawSpan * 0.15;
+  const rangeP = Math.max(maxP - minP, 0.0001);
+  const maxVol = Math.max(...visibleCandles.map((c) => c.volume), 1);
 
-    canvas.width = Math.floor(width * dpr);
-    canvas.height = Math.floor(height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, width, height);
+  const priceToY = (p: number) => padT + ((maxP - p) / rangeP) * priceH;
+  const stepX = plotW / Math.max(visibleCandles.length, 1);
+  const candleW = Math.max(6, Math.min(20, stepX * 0.62));
 
-    const padLeft = isMobile ? 10 : 18;
-    const padRight = isMobile ? 62 : 78;
-    const padTop = 24;
-    const padBottom = 26;
-    const volumeHeight = isMobile ? 40 : 50;
-    const pricePlotHeight = height - padTop - padBottom - volumeHeight - 8;
-    const plotWidth = Math.max(80, width - padLeft - padRight);
+  // محاسبه مختصات کندل‌ها، EMA و باند بولینگر
+  let ema9 = visibleCandles[0]?.close || activeAsset.price;
+  let ema21 = visibleCandles[0]?.close || activeAsset.price;
+  const k9 = 2 / 10;
+  const k21 = 2 / 22;
 
-    const allHighs = visibleCandles.map((c) => c.high);
-    const allLows = visibleCandles.map((c) => c.low);
-    const rawMax = Math.max(...allHighs);
-    const rawMin = Math.min(...allLows);
-    const rawSpan = Math.max(rawMax - rawMin, activeAsset.stepSize * 5);
-    const padding = rawSpan * 0.16;
+  const ema9Points: string[] = [];
+  const ema21Points: string[] = [];
+  const bbUpper: { x: number; y: number }[] = [];
+  const bbLower: { x: number; y: number }[] = [];
+  const closePoints: { x: number; y: number }[] = [];
 
-    const maxPrice = rawMax + padding;
-    const minPrice = rawMin - padding;
-    const priceRange = Math.max(maxPrice - minPrice, 0.0001);
-    const maxVol = Math.max(...visibleCandles.map((c) => c.volume), 1);
+  visibleCandles.forEach((c, idx) => {
+    const x = Number((padL + idx * stepX + stepX / 2).toFixed(1));
+    const yClose = Number(priceToY(c.close).toFixed(1));
+    closePoints.push({ x, y: yClose });
 
-    const priceToY = (p: number) =>
-      padTop + ((maxPrice - p) / priceRange) * pricePlotHeight;
+    ema9 = c.close * k9 + ema9 * (1 - k9);
+    ema21 = c.close * k21 + ema21 * (1 - k21);
+    ema9Points.push(`${x},${priceToY(ema9).toFixed(1)}`);
+    ema21Points.push(`${x},${priceToY(ema21).toFixed(1)}`);
 
-    // ۱. شبکه شطرنجی و قیمت‌ها
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-    ctx.lineWidth = 1;
-    ctx.font = `${isMobile ? "9px" : "10.5px"} 'JetBrains Mono', monospace`;
-    ctx.fillStyle = "rgba(148, 163, 184, 0.78)";
+    const slice = visibleCandles.slice(Math.max(0, idx - 5), idx + 1);
+    const mean = slice.reduce((s, item) => s + item.close, 0) / slice.length;
+    const variance =
+      slice.reduce((s, item) => s + Math.pow(item.close - mean, 2), 0) /
+      slice.length;
+    const std = Math.max(Math.sqrt(variance), rawSpan * 0.08);
+    bbUpper.push({ x, y: Number(priceToY(mean + std * 1.65).toFixed(1)) });
+    bbLower.push({ x, y: Number(priceToY(mean - std * 1.65).toFixed(1)) });
+  });
 
-    const gridSteps = 4;
-    for (let i = 0; i <= gridSteps; i++) {
-      const y = padTop + (pricePlotHeight / gridSteps) * i;
-      const pVal = maxPrice - (priceRange / gridSteps) * i;
+  const bbPolygonPoints = [
+    ...bbUpper.map((p) => `${p.x},${p.y}`),
+    ...[...bbLower].reverse().map((p) => `${p.x},${p.y}`),
+  ].join(" ");
 
-      ctx.beginPath();
-      ctx.moveTo(padLeft, y);
-      ctx.lineTo(width - padRight, y);
-      ctx.stroke();
+  const areaLinePoints = closePoints.map((p) => `${p.x},${p.y}`).join(" ");
+  const areaPolygonPoints =
+    closePoints.length > 0
+      ? `${closePoints[0].x},${padT + priceH} ${areaLinePoints} ${
+          closePoints[closePoints.length - 1].x
+        },${padT + priceH}`
+      : "";
 
-      ctx.fillText(
-        `$${pVal.toFixed(pVal < 500 ? 2 : 0)}`,
-        width - padRight + 5,
-        y + 3
-      );
-    }
+  const rsiPoints = visibleCandles
+    .map((c, idx) => {
+      const x = (padL + idx * stepX + stepX / 2).toFixed(1);
+      const y = (volTop + ((100 - c.rsi) / 100) * volH).toFixed(1);
+      return `${x},${y}`;
+    })
+    .join(" ");
 
-    const stepX = plotWidth / Math.max(visibleCandles.length - 1, 1);
-    const candleWidth = Math.max(
-      isMobile ? 4 : 5,
-      Math.min(16, (plotWidth / visibleCandles.length) * 0.64)
-    );
+  const lastCandle = visibleCandles[visibleCandles.length - 1];
+  const lastY = lastCandle ? priceToY(lastCandle.close) : padT + priceH / 2;
 
-    // ۲. رسم کانال باندهای بولینگر (Bollinger Bands)
-    if (showBollinger && visibleCandles.length > 3) {
-      const upperPts: { x: number; y: number }[] = [];
-      const lowerPts: { x: number; y: number }[] = [];
-
-      visibleCandles.forEach((c, idx) => {
-        const slice = visibleCandles.slice(Math.max(0, idx - 5), idx + 1);
-        const mean = slice.reduce((s, item) => s + item.close, 0) / slice.length;
-        const variance =
-          slice.reduce((s, item) => s + Math.pow(item.close - mean, 2), 0) /
-          slice.length;
-        const std = Math.max(Math.sqrt(variance), rawSpan * 0.08);
-
-        const x = padLeft + idx * stepX;
-        upperPts.push({ x, y: priceToY(mean + std * 1.65) });
-        lowerPts.push({ x, y: priceToY(mean - std * 1.65) });
-      });
-
-      ctx.save();
-      ctx.beginPath();
-      upperPts.forEach((pt, i) =>
-        i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y)
-      );
-      for (let i = lowerPts.length - 1; i >= 0; i--) {
-        ctx.lineTo(lowerPts[i].x, lowerPts[i].y);
-      }
-      ctx.closePath();
-      ctx.fillStyle = "rgba(0, 240, 255, 0.055)";
-      ctx.fill();
-
-      ctx.strokeStyle = "rgba(0, 240, 255, 0.25)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      upperPts.forEach((pt, i) =>
-        i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y)
-      );
-      ctx.stroke();
-
-      ctx.beginPath();
-      lowerPts.forEach((pt, i) =>
-        i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y)
-      );
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // ۳. رسم هیستوگرام حجم معاملات در پایین
-    const volTopY = padTop + pricePlotHeight + 8;
-    visibleCandles.forEach((c, idx) => {
-      const x = padLeft + idx * stepX;
-      const isUp = c.close >= c.open;
-      const vH = (c.volume / maxVol) * (volumeHeight - 6);
-      const vY = volTopY + volumeHeight - vH;
-
-      ctx.fillStyle = isUp
-        ? "rgba(16, 185, 129, 0.32)"
-        : "rgba(244, 63, 94, 0.32)";
-      ctx.fillRect(x - candleWidth / 2, vY, candleWidth, vH);
-
-      const labelStep = isMobile ? 7 : 5;
-      if (idx % labelStep === 0) {
-        ctx.fillStyle = "rgba(148, 163, 184, 0.6)";
-        ctx.fillText(c.time, Math.max(padLeft, x - 14), height - 7);
-      }
-    });
-
-    // ۴. رسم کندل‌استیک‌های نئونی یا منحنی Area
-    if (chartMode === "CANDLE") {
-      visibleCandles.forEach((c, idx) => {
-        const x = padLeft + idx * stepX;
-        const isUp = c.close >= c.open;
-        const color = isUp ? "#10B981" : "#F43F5E";
-
-        const highY = priceToY(c.high);
-        const lowY = priceToY(c.low);
-        const openY = priceToY(c.open);
-        const closeY = priceToY(c.close);
-
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.4;
-        ctx.beginPath();
-        ctx.moveTo(x, highY);
-        ctx.lineTo(x, lowY);
-        ctx.stroke();
-
-        const bodyTop = Math.min(openY, closeY);
-        const bodyHeight = Math.max(Math.abs(closeY - openY), 2.5);
-
-        ctx.save();
-        ctx.shadowColor = color;
-        ctx.shadowBlur = idx === visibleCandles.length - 1 ? 10 : 4;
-        ctx.fillStyle = color;
-        ctx.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
-        ctx.restore();
-
-        // رسم سیگنال‌های هوش مصنوعی روی کندل‌ها
-        if (showAISignals && c.signal) {
-          ctx.save();
-          ctx.font = "bold 9px 'JetBrains Mono', monospace";
-          if (c.signal === "BUY") {
-            ctx.fillStyle = "#00F0FF";
-            ctx.fillText("▲BUY", x - 12, lowY + 11);
-          } else {
-            ctx.fillStyle = "#F59E0B";
-            ctx.fillText("▼SELL", x - 14, highY - 5);
-          }
-          ctx.restore();
-        }
-      });
-    } else {
-      const pts = visibleCandles.map((c, idx) => ({
-        x: padLeft + idx * stepX,
-        y: priceToY(c.close),
-      }));
-
-      const mainColor = isPositive ? "#10B981" : "#F43F5E";
-      const grad = ctx.createLinearGradient(0, padTop, 0, padTop + pricePlotHeight);
-      grad.addColorStop(
-        0,
-        isPositive ? "rgba(16, 185, 129, 0.42)" : "rgba(244, 63, 94, 0.42)"
-      );
-      grad.addColorStop(1, "rgba(4, 6, 10, 0.0)");
-
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, padTop + pricePlotHeight);
-      pts.forEach((pt, i) => {
-        if (i === 0) ctx.lineTo(pt.x, pt.y);
-        else {
-          const prev = pts[i - 1];
-          const cx = (prev.x + pt.x) / 2;
-          ctx.bezierCurveTo(cx, prev.y, cx, pt.y, pt.x, pt.y);
-        }
-      });
-      ctx.lineTo(pts[pts.length - 1].x, padTop + pricePlotHeight);
-      ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      ctx.save();
-      ctx.shadowColor = mainColor;
-      ctx.shadowBlur = 12;
-      ctx.beginPath();
-      pts.forEach((pt, i) => {
-        if (i === 0) ctx.moveTo(pt.x, pt.y);
-        else {
-          const prev = pts[i - 1];
-          const cx = (prev.x + pt.x) / 2;
-          ctx.bezierCurveTo(cx, prev.y, cx, pt.y, pt.x, pt.y);
-        }
-      });
-      ctx.strokeStyle = mainColor;
-      ctx.lineWidth = 2.6;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // ۵. رسم خطوط EMA-9 (فیروزه‌ای) و EMA-21 (بنفش)
-    if (showEMA) {
-      let ema9 = visibleCandles[0].close;
-      let ema21 = visibleCandles[0].close;
-      const k9 = 2 / 10;
-      const k21 = 2 / 22;
-
-      ctx.beginPath();
-      visibleCandles.forEach((c, idx) => {
-        ema9 = c.close * k9 + ema9 * (1 - k9);
-        const x = padLeft + idx * stepX;
-        const y = priceToY(ema9);
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = "#00F0FF";
-      ctx.lineWidth = 1.6;
-      ctx.stroke();
-
-      ctx.beginPath();
-      visibleCandles.forEach((c, idx) => {
-        ema21 = c.close * k21 + ema21 * (1 - k21);
-        const x = padLeft + idx * stepX;
-        const y = priceToY(ema21);
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = "#A855F7";
-      ctx.lineWidth = 1.4;
-      ctx.stroke();
-    }
-
-    // ۶. خط قیمت لحظه‌ای و بج سمت راست
-    const lastCandle = visibleCandles[visibleCandles.length - 1];
-    const lastY = priceToY(lastCandle.close);
-    ctx.save();
-    ctx.setLineDash([3, 3]);
-    ctx.strokeStyle = isPositive
-      ? "rgba(16, 185, 129, 0.7)"
-      : "rgba(244, 63, 94, 0.7)";
-    ctx.beginPath();
-    ctx.moveTo(padLeft, lastY);
-    ctx.lineTo(width - padRight, lastY);
-    ctx.stroke();
-    ctx.restore();
-
-    ctx.fillStyle = isPositive ? "#10B981" : "#F43F5E";
-    ctx.fillRect(width - padRight + 2, lastY - 9, padRight - 4, 18);
-    ctx.fillStyle = "#030509";
-    ctx.font = `bold ${isMobile ? "9px" : "10px"} 'JetBrains Mono', monospace`;
-    ctx.fillText(
-      `$${lastCandle.close.toFixed(lastCandle.close < 500 ? 2 : 0)}`,
-      width - padRight + 5,
-      lastY + 3.5
-    );
-
-    // ۷. نشانگر لمس موبایل و ماوس + باکس شناور اطلاعات کندل روی نمودار
-    if (hoverIdx !== null && visibleCandles[hoverIdx]) {
-      const hc = visibleCandles[hoverIdx];
-      const hx = padLeft + hoverIdx * stepX;
-      const hy = priceToY(hc.close);
-
-      ctx.save();
-      ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = "rgba(0, 240, 255, 0.65)";
-      ctx.beginPath();
-      ctx.moveTo(hx, padTop);
-      ctx.lineTo(hx, height - padBottom);
-      ctx.moveTo(padLeft, hy);
-      ctx.lineTo(width - padRight, hy);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(hx, hy, 5, 0, Math.PI * 2);
-      ctx.fillStyle = "#00F0FF";
-      ctx.fill();
-      ctx.restore();
-    }
-  }, [
-    visibleCandles,
-    chartMode,
-    showBollinger,
-    showEMA,
-    showAISignals,
-    isPositive,
-    hoverIdx,
-    canvasSize,
-    activeAsset.stepSize,
-  ]);
-
-  const updatePointerIndex = (clientX: number, rect: DOMRect) => {
-    const isMobile = rect.width < 520;
-    const padLeft = isMobile ? 10 : 18;
-    const padRight = isMobile ? 62 : 78;
-    const plotWidth = Math.max(80, rect.width - padLeft - padRight);
-    const relX = clientX - rect.left - padLeft;
-    const ratio = Math.max(0, Math.min(1, relX / plotWidth));
-    const idx = Math.round(ratio * (visibleCandles.length - 1));
-    setHoverIdx(idx);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    updatePointerIndex(e.clientX, e.currentTarget.getBoundingClientRect());
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.touches.length > 0) {
-      updatePointerIndex(
-        e.touches[0].clientX,
-        e.currentTarget.getBoundingClientRect()
-      );
-    }
-  };
-
-  const inspectedCandle =
+  const inspected =
     hoverIdx !== null && visibleCandles[hoverIdx]
       ? visibleCandles[hoverIdx]
-      : visibleCandles[visibleCandles.length - 1];
+      : lastCandle;
 
   return (
     <div
       dir={lang === "fa" ? "rtl" : "ltr"}
-      className="glass-card rounded-2xl border border-white/15 p-3.5 md:p-5 flex flex-col justify-between space-y-3 h-full"
+      className="cyber-card rounded-2xl border border-white/15 p-3.5 md:p-5 flex flex-col justify-between space-y-3 h-full min-w-0 overflow-hidden"
     >
-      {/* ردیف اول: انتخاب ارزها و تایم‌فریم‌های واقعی */}
+      {/* ردیف اول: نمادها و تایم‌فریم‌ها */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           {SYMBOLS.map((sym) => {
@@ -436,9 +150,9 @@ export default function LiveCanvasChart() {
               <button
                 key={sym}
                 onClick={() => setSelectedSymbol(sym)}
-                className={`px-2.5 py-1.5 rounded-xl font-mono text-xs transition-all border flex items-center gap-1.5 shrink-0 ${
+                className={`px-3 py-1.5 rounded-xl font-mono text-xs transition-all border flex items-center gap-1.5 shrink-0 ${
                   active
-                    ? "bg-emerald-500/20 border-emerald-400 text-white neon-border-emerald"
+                    ? "bg-emerald-500/20 border-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]"
                     : "bg-white/[0.03] hover:bg-white/10 border-white/10 text-slate-400"
                 }`}
               >
@@ -452,8 +166,7 @@ export default function LiveCanvasChart() {
           })}
         </div>
 
-        {/* تایم‌فریم‌ها */}
-        <div className="flex items-center gap-1 bg-[#030509] p-1 rounded-xl border border-white/10 font-mono text-xs">
+        <div className="flex items-center gap-1 bg-[#020408] p-1 rounded-xl border border-white/10 font-mono text-xs">
           {TIMEFRAMES.map((tf) => (
             <button
               key={tf}
@@ -470,18 +183,22 @@ export default function LiveCanvasChart() {
         </div>
       </div>
 
-      {/* ردیف دوم: قیمت لحظه‌ای + دکمه‌های اندیکاتورها (Bollinger / EMA / AI Signals / Zoom) */}
+      {/* ردیف دوم: قیمت و ابزارهای اندیکاتور */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="text-xs text-slate-400 font-medium">
-            {activeAsset.name[lang]} •{" "}
-            <span className="font-mono text-cyan-400">TF: {timeframe}</span>
+          <div className="text-xs text-slate-400 flex items-center gap-2">
+            <span className="font-bold text-slate-200">
+              {activeAsset.name[lang]}
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
+              SVG VECTOR HD
+            </span>
           </div>
-          <div className="flex items-baseline gap-2.5 mt-0.5">
-            <h2 className="text-2xl sm:text-3xl font-mono font-extrabold text-white tracking-tight">
+          <div className="flex items-baseline gap-2.5 mt-1">
+            <h2 className="text-2xl sm:text-3xl font-mono font-black text-white tracking-tight">
               $
-              {inspectedCandle
-                ? inspectedCandle.close.toLocaleString("en-US", {
+              {inspected
+                ? inspected.close.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                   })
                 : activeAsset.price.toLocaleString("en-US", {
@@ -506,13 +223,13 @@ export default function LiveCanvasChart() {
           </div>
         </div>
 
-        {/* نوار کنترل اندیکاتورهای مهندسی */}
+        {/* دکمه‌های اندیکاتورها و زوم */}
         <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
           <button
             onClick={() =>
               setChartMode(chartMode === "CANDLE" ? "AREA" : "CANDLE")
             }
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-400/40 text-emerald-300"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 font-bold"
           >
             {chartMode === "CANDLE" ? (
               <>
@@ -522,7 +239,7 @@ export default function LiveCanvasChart() {
             ) : (
               <>
                 <Activity className="w-3.5 h-3.5" />
-                <span>Area</span>
+                <span>Neon Area</span>
               </>
             )}
           </button>
@@ -531,7 +248,7 @@ export default function LiveCanvasChart() {
             onClick={toggleBollinger}
             className={`px-2 py-1.5 rounded-lg border transition-all ${
               showBollinger
-                ? "bg-cyan-500/20 border-cyan-400/40 text-cyan-300"
+                ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-200 font-bold"
                 : "bg-white/5 border-white/10 text-slate-500"
             }`}
           >
@@ -542,7 +259,7 @@ export default function LiveCanvasChart() {
             onClick={toggleEMA}
             className={`px-2 py-1.5 rounded-lg border transition-all ${
               showEMA
-                ? "bg-purple-500/20 border-purple-400/40 text-purple-300"
+                ? "bg-purple-500/20 border-purple-400/50 text-purple-200 font-bold"
                 : "bg-white/5 border-white/10 text-slate-500"
             }`}
           >
@@ -553,7 +270,7 @@ export default function LiveCanvasChart() {
             onClick={toggleAISignals}
             className={`flex items-center gap-1 px-2 py-1.5 rounded-lg border transition-all ${
               showAISignals
-                ? "bg-amber-500/20 border-amber-400/40 text-amber-300"
+                ? "bg-amber-500/20 border-amber-400/50 text-amber-200 font-bold"
                 : "bg-white/5 border-white/10 text-slate-500"
             }`}
           >
@@ -561,24 +278,24 @@ export default function LiveCanvasChart() {
             <span>AI Signals</span>
           </button>
 
-          <div className="flex items-center gap-0.5 bg-[#030509] p-0.5 rounded-lg border border-white/10">
+          <div className="flex items-center gap-0.5 bg-[#020408] p-0.5 rounded-lg border border-white/15">
             <button
-              onClick={() => setZoomCount(zoomCount - 6)}
-              className="p-1 rounded hover:bg-white/10 text-slate-300"
+              onClick={() => setZoomCount(zoomCount - 5)}
+              className="p-1.5 rounded hover:bg-white/10 text-cyan-300"
               title="Zoom In"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => setZoomCount(zoomCount + 6)}
-              className="p-1 rounded hover:bg-white/10 text-slate-300"
+              onClick={() => setZoomCount(zoomCount + 5)}
+              className="p-1.5 rounded hover:bg-white/10 text-cyan-300"
               title="Zoom Out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => setZoomCount(28)}
-              className="p-1 rounded hover:bg-white/10 text-emerald-400"
+              onClick={() => setZoomCount(26)}
+              className="p-1.5 rounded hover:bg-white/10 text-emerald-400"
               title="Reset"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -587,54 +304,343 @@ export default function LiveCanvasChart() {
         </div>
       </div>
 
-      {/* نوار OHLC کندل زیر انگشت یا ماوس */}
-      {inspectedCandle && (
+      {/* نوار تلمتری کندل انتخابی */}
+      {inspected && (
         <div
           dir="ltr"
-          className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono bg-[#030509]/90 px-3 py-1.5 rounded-xl border border-white/10"
+          className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono bg-[#020408]/95 px-3 py-1.5 rounded-xl border border-white/10"
         >
           <div className="flex flex-wrap items-center gap-3">
             <span>
               <b className="text-slate-500">TIME:</b>{" "}
-              <span className="text-white">{inspectedCandle.time}</span>
+              <span className="text-white">{inspected.time}</span>
             </span>
             <span>
-              <b className="text-slate-500">O:</b> ${inspectedCandle.open}
+              <b className="text-slate-500">O:</b> ${inspected.open}
             </span>
             <span>
               <b className="text-slate-500">H:</b>{" "}
-              <span className="text-emerald-400">${inspectedCandle.high}</span>
+              <span className="text-emerald-400">${inspected.high}</span>
             </span>
             <span>
               <b className="text-slate-500">L:</b>{" "}
-              <span className="text-rose-400">${inspectedCandle.low}</span>
+              <span className="text-rose-400">${inspected.low}</span>
             </span>
             <span>
               <b className="text-slate-500">C:</b>{" "}
-              <span className="text-cyan-400 font-bold">
-                ${inspectedCandle.close}
-              </span>
+              <span className="text-cyan-300 font-bold">${inspected.close}</span>
             </span>
           </div>
-          <span className="text-slate-400">Vol: {inspectedCandle.volume}K</span>
+          <div className="flex items-center gap-3">
+            <span className="text-purple-300">RSI: {inspected.rsi}</span>
+            <span className="text-slate-400">Vol: {inspected.volume}K</span>
+          </div>
         </div>
       )}
 
-      {/* بوم گرافیکی نمودار با پشتیبانی کامل از لمس اندروید */}
+      {/* نمودار برداری Pure SVG با کیفیت بی‌نهایت در موبایل و دسکتاپ */}
       <div
-        ref={containerRef}
         dir="ltr"
-        className="relative w-full h-[310px] sm:h-[380px] rounded-xl bg-[#030509] border border-white/10 overflow-hidden touch-pan-y"
+        className="relative w-full rounded-xl bg-[#020409] border border-white/15 overflow-hidden select-none"
       >
-        <canvas
-          ref={canvasRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={() => setHoverIdx(null)}
-          onTouchStart={handleTouchMove}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={() => setHoverIdx(null)}
-          className="w-full h-full cursor-crosshair block"
-        />
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          className="w-full h-[300px] sm:h-[385px] block"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="areaGradUp" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10B981" stopOpacity="0.45" />
+              <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+            </linearGradient>
+            <linearGradient id="areaGradDown" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.45" />
+              <stop offset="100%" stopColor="#F43F5E" stopOpacity="0.0" />
+            </linearGradient>
+            <linearGradient id="bbGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#00F0FF" stopOpacity="0.10" />
+              <stop offset="50%" stopColor="#A855F7" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="#00F0FF" stopOpacity="0.10" />
+            </linearGradient>
+          </defs>
+
+          {/* ۱. خطوط افقی شبکه قیمت */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+            const y = padT + priceH * ratio;
+            const pVal = maxP - rangeP * ratio;
+            return (
+              <g key={`grid-${i}`}>
+                <line
+                  x1={padL}
+                  y1={y}
+                  x2={W - padR}
+                  y2={y}
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeWidth="1"
+                />
+                <text
+                  x={W - padR + 8}
+                  y={y + 4}
+                  fill="rgba(148,163,184,0.85)"
+                  fontSize="11"
+                  fontFamily="JetBrains Mono, monospace"
+                >
+                  ${pVal.toFixed(pVal < 500 ? 2 : 0)}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* ۲. کانال باندهای بولینگر */}
+          {showBollinger && bbUpper.length > 2 && (
+            <g>
+              <polygon points={bbPolygonPoints} fill="url(#bbGrad)" />
+              <polyline
+                fill="none"
+                stroke="rgba(0, 240, 255, 0.35)"
+                strokeWidth="1.3"
+                points={bbUpper.map((p) => `${p.x},${p.y}`).join(" ")}
+              />
+              <polyline
+                fill="none"
+                stroke="rgba(0, 240, 255, 0.35)"
+                strokeWidth="1.3"
+                points={bbLower.map((p) => `${p.x},${p.y}`).join(" ")}
+              />
+            </g>
+          )}
+
+          {/* ۳. رسم کندل‌استیک‌ها یا منحنی نئونی */}
+          {chartMode === "CANDLE" ? (
+            visibleCandles.map((c, idx) => {
+              const cx = padL + idx * stepX + stepX / 2;
+              const isUp = c.close >= c.open;
+              const color = isUp ? "#10B981" : "#F43F5E";
+              const highY = priceToY(c.high);
+              const lowY = priceToY(c.low);
+              const openY = priceToY(c.open);
+              const closeY = priceToY(c.close);
+              const bodyTop = Math.min(openY, closeY);
+              const bodyH = Math.max(Math.abs(closeY - openY), 3);
+
+              return (
+                <g key={`candle-${idx}`}>
+                  <line
+                    x1={cx}
+                    y1={highY}
+                    x2={cx}
+                    y2={lowY}
+                    stroke={color}
+                    strokeWidth="1.8"
+                  />
+                  <rect
+                    x={cx - candleW / 2}
+                    y={bodyTop}
+                    width={candleW}
+                    height={bodyH}
+                    rx="1.5"
+                    fill={color}
+                  />
+                  {showAISignals && c.signal && (
+                    <g>
+                      <rect
+                        x={cx - 18}
+                        y={c.signal === "BUY" ? lowY + 4 : highY - 18}
+                        width="36"
+                        height="13"
+                        rx="3"
+                        fill={
+                          c.signal === "BUY"
+                            ? "rgba(0, 240, 255, 0.22)"
+                            : "rgba(245, 158, 11, 0.25)"
+                        }
+                        stroke={c.signal === "BUY" ? "#00F0FF" : "#F59E0B"}
+                        strokeWidth="0.8"
+                      />
+                      <text
+                        x={cx}
+                        y={c.signal === "BUY" ? lowY + 13 : highY - 9}
+                        textAnchor="middle"
+                        fill={c.signal === "BUY" ? "#00F0FF" : "#FDE047"}
+                        fontSize="8.5"
+                        fontWeight="bold"
+                        fontFamily="JetBrains Mono, monospace"
+                      >
+                        {c.signal === "BUY" ? "▲BUY" : "▼SELL"}
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+            })
+          ) : (
+            <g>
+              <polygon
+                points={areaPolygonPoints}
+                fill={isPositive ? "url(#areaGradUp)" : "url(#areaGradDown)"}
+              />
+              <polyline
+                fill="none"
+                stroke={isPositive ? "#10B981" : "#F43F5E"}
+                strokeWidth="3"
+                points={areaLinePoints}
+              />
+            </g>
+          )}
+
+          {/* ۴. میانگین‌های متحرک EMA-9 و EMA-21 */}
+          {showEMA && (
+            <g>
+              <polyline
+                fill="none"
+                stroke="#00F0FF"
+                strokeWidth="2"
+                points={ema9Points.join(" ")}
+              />
+              <polyline
+                fill="none"
+                stroke="#A855F7"
+                strokeWidth="1.8"
+                strokeDasharray="4 3"
+                points={ema21Points.join(" ")}
+              />
+            </g>
+          )}
+
+          {/* ۵. خط افقی آخرین قیمت + تگ زنده قیمت */}
+          {lastCandle && (
+            <g>
+              <line
+                x1={padL}
+                y1={lastY}
+                x2={W - padR}
+                y2={lastY}
+                stroke={isPositive ? "#10B981" : "#F43F5E"}
+                strokeWidth="1.2"
+                strokeDasharray="4 4"
+              />
+              <rect
+                x={W - padR + 2}
+                y={lastY - 10}
+                width={padR - 4}
+                height="20"
+                rx="4"
+                fill={isPositive ? "#10B981" : "#F43F5E"}
+              />
+              <text
+                x={W - padR + (padR - 4) / 2}
+                y={lastY + 4}
+                textAnchor="middle"
+                fill="#020408"
+                fontSize="10.5"
+                fontWeight="bold"
+                fontFamily="JetBrains Mono, monospace"
+              >
+                ${lastCandle.close.toFixed(lastCandle.close < 500 ? 2 : 0)}
+              </text>
+            </g>
+          )}
+
+          {/* ۶. زیرنمودار پایین: هیستوگرام حجم معاملات + منحنی RSI */}
+          <line
+            x1={padL}
+            y1={volTop - 6}
+            x2={W - padR}
+            y2={volTop - 6}
+            stroke="rgba(255,255,255,0.12)"
+            strokeWidth="1"
+          />
+          <text
+            x={padL + 6}
+            y={volTop + 12}
+            fill="rgba(168,85,247,0.9)"
+            fontSize="10"
+            fontFamily="JetBrains Mono, monospace"
+          >
+            VOLUME & RSI(14) OSCILLATOR
+          </text>
+
+          {visibleCandles.map((c, idx) => {
+            const cx = padL + idx * stepX + stepX / 2;
+            const isUp = c.close >= c.open;
+            const barH = (c.volume / maxVol) * (volH - 12);
+            const barY = volTop + volH - barH;
+            return (
+              <g key={`vol-${idx}`}>
+                <rect
+                  x={cx - candleW / 2}
+                  y={barY}
+                  width={candleW}
+                  height={barH}
+                  rx="1"
+                  fill={
+                    isUp
+                      ? "rgba(16, 185, 129, 0.35)"
+                      : "rgba(244, 63, 94, 0.35)"
+                  }
+                />
+                {idx % Math.max(1, Math.floor(visibleCandles.length / 6)) ===
+                  0 && (
+                  <text
+                    x={cx}
+                    y={H - 6}
+                    textAnchor="middle"
+                    fill="rgba(148,163,184,0.7)"
+                    fontSize="10"
+                    fontFamily="JetBrains Mono, monospace"
+                  >
+                    {c.time}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+
+          <polyline
+            fill="none"
+            stroke="#C084FC"
+            strokeWidth="1.8"
+            points={rsiPoints}
+          />
+
+          {/* ۷. خط راهنمای تعاملی (Crosshair) هنگام لمس یا هاور */}
+          {hoverIdx !== null && visibleCandles[hoverIdx] && (
+            <g>
+              <line
+                x1={padL + hoverIdx * stepX + stepX / 2}
+                y1={padT}
+                x2={padL + hoverIdx * stepX + stepX / 2}
+                y2={volTop + volH}
+                stroke="#00F0FF"
+                strokeWidth="1.2"
+                strokeDasharray="3 3"
+              />
+              <circle
+                cx={padL + hoverIdx * stepX + stepX / 2}
+                cy={priceToY(visibleCandles[hoverIdx].close)}
+                r="5"
+                fill="#00F0FF"
+                stroke="#020408"
+                strokeWidth="2"
+              />
+            </g>
+          )}
+
+          {/* ۸. ستون‌های نامرئی لمسی برای کارکرد ۱۰۰٪ دقیق در اندروید و دسکتاپ */}
+          {visibleCandles.map((_, idx) => (
+            <rect
+              key={`hit-${idx}`}
+              x={padL + idx * stepX}
+              y={0}
+              width={stepX}
+              height={H}
+              fill="transparent"
+              className="cursor-crosshair"
+              onMouseEnter={() => setHoverIdx(idx)}
+              onTouchStart={() => setHoverIdx(idx)}
+            />
+          ))}
+        </svg>
       </div>
     </div>
   );

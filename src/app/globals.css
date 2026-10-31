@@ -7,36 +7,53 @@
 }
 
 body {
-  background-color: #030509;
+  background-color: #020408;
   color: #f8fafc;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-.terminal-grid-bg {
-  background-color: #030509;
-  background-image: 
-    radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.12) 0px, transparent 45%),
-    radial-gradient(at 90% 15%, rgba(0, 240, 255, 0.10) 0px, transparent 45%),
-    radial-gradient(at 50% 85%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+.spatial-bg-emerald {
+  background-color: #020408;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.16) 0px, transparent 45%),
+    radial-gradient(at 100% 0%, rgba(0, 240, 255, 0.14) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(59, 130, 246, 0.10) 0px, transparent 50%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 24px 24px, 24px 24px;
 }
 
-.glass-card {
-  background: linear-gradient(165deg, rgba(14, 21, 35, 0.88) 0%, rgba(7, 10, 18, 0.95) 100%);
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
+.spatial-bg-purple {
+  background-color: #040209;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.18) 0px, transparent 45%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.14) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(0, 240, 255, 0.10) 0px, transparent 50%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 24px 24px, 24px 24px;
 }
 
-.neon-border-emerald {
-  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25), inset 0 1px 0 0 rgba(16, 185, 129, 0.3);
+.spatial-bg-gold {
+  background-color: #060502;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.16) 0px, transparent 45%),
+    radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 45%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
 }
 
-.neon-border-cyan {
-  box-shadow: 0 0 25px -5px rgba(0, 240, 255, 0.22), inset 0 1px 0 0 rgba(0, 240, 255, 0.3);
+.cyber-card {
+  background: linear-gradient(160deg, rgba(13, 20, 36, 0.88) 0%, rgba(5, 8, 16, 0.96) 100%);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+}
+
+.cyber-card-glow {
+  box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.22), inset 0 1px 0 0 rgba(0, 240, 255, 0.25);
 }
 
 ::-webkit-scrollbar {
@@ -44,12 +61,12 @@ body {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(8, 12, 20, 0.7);
+  background: rgba(5, 8, 16, 0.8);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.3);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 240, 255, 0.5);
+  background: rgba(0, 240, 255, 0.6);
 }
