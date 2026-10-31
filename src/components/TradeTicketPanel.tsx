@@ -106,7 +106,7 @@ export default function TradeTicketPanel() {
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            {lang === "fa" ? "فروش (SHORT / SELL)" : "SELL / SHORT"}
+            {lang === "fa" ? "فروش (SELL)" : "SELL"}
           </button>
         </div>
 
@@ -114,7 +114,7 @@ export default function TradeTicketPanel() {
           <div>
             <div className="flex justify-between text-xs text-slate-400 mb-1.5">
               <span>
-                {lang === "fa" ? "مبلغ تراکنش (USD):" : "Order Value (USD):"}
+                {lang === "fa" ? "مبلغ سفارش آزمایشی (USD):" : "Paper Order Value (USD):"}
               </span>
               <span className="font-mono text-slate-300">
                 {side === "BUY"
