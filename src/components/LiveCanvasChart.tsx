@@ -283,7 +283,7 @@ export default function LiveCanvasChart() {
             }`}
           >
             <Sparkles className="w-3 h-3" />
-            <span>AI Signals</span>
+            <span>Demo Signals</span>
           </button>
 
           <div className="flex items-center gap-1 bg-[#020408] p-1 rounded-xl border border-cyan-500/25">
