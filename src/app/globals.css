@@ -172,3 +172,7 @@ table { border-collapse: separate; border-spacing: 0; }
   .aurapulse-chart { touch-action: pan-y; }
   .aurapulse-chart svg { touch-action: pan-y; }
 }
+
+.aurapulse-page { min-height: 100svh; min-height: 100dvh; }
+@media (max-width: 767px) { .aurapulse-page .cyber-card button { min-height: 40px; } }
+@media (hover: none) { .btn-cyber:hover { transform: none; } }
