@@ -76,8 +76,8 @@ export default function TradeTicketPanel() {
             <ArrowDownUp className="w-4 h-4 text-emerald-400" />
             <span>
               {lang === "fa"
-                ? "ثبت سفارش آنی (Optimistic UI)"
-                : "Instant Execution Ticket"}
+                ? "ثبت سفارش آزمایشی محلی"
+                : "Local Paper-Trade Ticket"}
             </span>
           </h3>
           <span className="font-mono text-[11px] text-cyan-400">
@@ -163,8 +163,8 @@ export default function TradeTicketPanel() {
               </span>
             </div>
             <div className="flex justify-between text-slate-400">
-              <span>{lang === "fa" ? "کارمزد شبکه:" : "Zero-Latency Fee:"}</span>
-              <span className="text-emerald-400">0.01% (Quant Tier)</span>
+              <span>{lang === "fa" ? "کارمزد شبیه‌سازی:" : "Fee Model:"}</span>
+              <span className="text-emerald-400">Not applied</span>
             </div>
           </div>
 
