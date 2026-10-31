@@ -110,6 +110,7 @@ export default function TopNav() {
 
           <button
             onClick={toggleLiveStream}
+            title={lang === "fa" ? "توقف یا ادامهٔ شبیه‌سازی محلی؛ دریافت قیمت بایننس ادامه دارد." : "Pause or resume the local demo simulator. Binance price polling continues."}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono border transition-all ${
               isLiveStreamActive
                 ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
@@ -119,12 +120,12 @@ export default function TopNav() {
             {isLiveStreamActive ? (
               <>
                 <Pause className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">LIVE</span>
+                <span className="hidden sm:inline">SIM ON</span>
               </>
             ) : (
               <>
                 <Play className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">PAUSED</span>
+                <span className="hidden sm:inline">SIM PAUSED</span>
               </>
             )}
           </button>
