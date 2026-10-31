@@ -532,9 +532,9 @@ const triggerMarketShock = (direction: "PUMP" | "CRASH") => {
 };
 
 const tickMarket = () => {
+  if (!globalState.isLiveStreamActive) return;
   tickCounter++;
   setState((state) => {
-    if (!state.isLiveStreamActive) return {};
     const updatedAssets = { ...state.assets };
     const tf = state.timeframe;
     const isNewCandleTick = tickCounter % 3 === 0;
