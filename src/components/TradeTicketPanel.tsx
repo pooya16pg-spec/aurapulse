@@ -204,7 +204,7 @@ export default function TradeTicketPanel() {
         <div className="relative h-28 w-full rounded-xl overflow-hidden bg-gradient-to-br from-emerald-500/20 via-slate-900 to-cyan-500/20 border border-white/10 flex items-center justify-center">
           <img
             src="/aurapulse/assets/quant-core.webp"
-            alt="AI Quant Risk Engine"
+            alt="Illustrative risk-metrics graphic"
             className="w-full h-full object-cover opacity-85"
             onError={(e) => {
               const target = e.currentTarget;
@@ -220,8 +220,8 @@ export default function TradeTicketPanel() {
             <span className="flex items-center gap-1.5 text-xs font-bold text-white">
               <Cpu className="w-4 h-4 text-cyan-400" />
               {lang === "fa"
-                ? "موتور تحلیل ریسک کوانتومی"
-                : "Neural Quant Risk Engine"}
+                ? "شاخص‌های نمونه ریسک"
+                : "Sample Risk Metrics"}
             </span>
             <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
               DEMO METRICS
