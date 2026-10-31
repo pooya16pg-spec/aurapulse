@@ -39,18 +39,21 @@ export default function OrderBookPanel() {
           </h3>
         </div>
         <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-cyan-300 border border-cyan-400/20">
+          {lang === "fa" ? "شبیه‌سازی‌شده" : "SIMULATED"}
+        </span>
+        <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-cyan-300 border border-cyan-400/20">
           {selectedSymbol}
         </span>
       </div>
 
-      {/* نوار فشار خرید و فروش نهنگ‌ها */}
+      {/* Illustrative demo buy/sell bias, not live whale-flow data. */}
       <div className="space-y-1">
         <div className="flex justify-between text-[10px] font-mono">
           <span className="text-emerald-400 font-bold">
-            Bulls {buyPressure}%
+            Demo Buy {buyPressure}%
           </span>
           <span className="text-rose-400 font-bold">
-            Bears {sellPressure}%
+            Demo Sell {sellPressure}%
           </span>
         </div>
         <div className="w-full h-2 rounded-full bg-rose-500/30 overflow-hidden flex">

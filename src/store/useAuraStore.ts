@@ -47,6 +47,14 @@ export interface AssetInfo {
   bids: OrderBookLevel[];
 }
 
+export interface BinanceMarketUpdate {
+  price: number;
+  change24h: number;
+  high24h: number;
+  low24h: number;
+  volume24h: string;
+}
+
 export interface TradeOrder {
   id: string;
   symbol: AssetSymbol;
@@ -72,6 +80,7 @@ interface AuraState {
   selectedOrderBookPrice: number | null;
   isCommandOpen: boolean;
   isLiveStreamActive: boolean;
+  isBinanceConnected: boolean;
   isAutoBotActive: boolean;
   lastNotification: string | null;
   aiLogs: string[];
@@ -281,13 +290,14 @@ let globalState: AuraState = {
   selectedOrderBookPrice: null,
   isCommandOpen: false,
   isLiveStreamActive: true,
+  isBinanceConnected: false,
   isAutoBotActive: false,
   lastNotification: null,
   aiLogs: [
-    "[14:22:01] QUANT-CORE :: Connected to L2 Institutional Liquidity Pool (0.3ms)",
-    "[14:22:05] ORDER-FLOW :: Whale accumulation detected on BTC/USD (+2.8σ)",
-    "[14:22:09] ALPHA-RADAR :: NVDA/AI synthetic momentum crossed EMA-21 threshold",
-    "[14:22:14] RISK-ENGINE :: Portfolio Sharpe Ratio stabilized at 3.48 (Optimal)",
+    "[DEMO] Market simulator initialized; seeded chart history is illustrative.",
+    "[DEMO] BTC / ETH / SOL use public Binance 24h ticker data when reachable.",
+    "[DEMO] NVDA/AI is a synthetic demo symbol, not a live exchange listing.",
+    "[PAPER] Orders are local browser calculations; no exchange orders are sent.",
   ],
   balanceUSD: 128500.0,
   assets: INITIAL_ASSETS,
@@ -369,6 +379,64 @@ const setCommandOpen = (open: boolean) =>
 const toggleLiveStream = () =>
   setState((state) => ({ isLiveStreamActive: !state.isLiveStreamActive }));
 
+const setBinanceConnected = (connected: boolean) =>
+  setState(() => ({ isBinanceConnected: connected }));
+
+const applyBinanceTickerData = (
+  updates: Partial<Record<AssetSymbol, BinanceMarketUpdate>>
+) => {
+  const nextAssets = { ...globalState.assets };
+  const timeframe = globalState.timeframe;
+  let applied = 0;
+
+  (["BTC/USD", "ETH/USD", "SOL/USD"] as AssetSymbol[]).forEach((sym) => {
+    const quote = updates[sym];
+    if (
+      !quote ||
+      !Number.isFinite(quote.price) ||
+      quote.price <= 0 ||
+      !Number.isFinite(quote.change24h)
+    ) return;
+
+    const item = nextAssets[sym];
+    const candles = [...item.candlesByTf[timeframe]];
+    if (candles.length > 0) {
+      const lastIndex = candles.length - 1;
+      const last = candles[lastIndex];
+      candles[lastIndex] = {
+        ...last,
+        close: quote.price,
+        high: Math.max(last.high, quote.price),
+        low: Math.min(last.low, quote.price),
+      };
+    }
+    const { asks, bids } = buildOrderBook(
+      quote.price,
+      item.stepSize,
+      Date.now() + applied
+    );
+
+    nextAssets[sym] = {
+      ...item,
+      price: quote.price,
+      change24h: quote.change24h,
+      high24h: quote.high24h,
+      low24h: quote.low24h,
+      volume24h: quote.volume24h,
+      history: candles.map((c) => c.close),
+      candles,
+      candlesByTf: { ...item.candlesByTf, [timeframe]: candles },
+      asks,
+      bids,
+    };
+    applied += 1;
+  });
+
+  if (applied > 0) {
+    setState(() => ({ assets: nextAssets, isBinanceConnected: true }));
+  }
+};
+
 const toggleAutoBot = () =>
   setState((state) => {
     const next = !state.isAutoBotActive;
@@ -378,18 +446,18 @@ const toggleAutoBot = () =>
       aiLogs: [
         `[${now}] AUTO-BOT :: ${
           next
-            ? "Autonomous Neural Execution Engine ENABLED (5x Scalping Mode)"
-            : "Autonomous Engine PAUSED by user"
+            ? "Local 1x spot paper-trading simulation ENABLED"
+            : "Local paper-trading demo bot PAUSED by user"
         }`,
         ...state.aiLogs.slice(0, 12),
       ],
       lastNotification: next
         ? state.lang === "fa"
-          ? "🤖 ربات معامله‌گر خودکار کوانتومی فعال شد!"
-          : "🤖 AI Auto-Quant Trading Bot Activated!"
+          ? "🤖 شبیه‌ساز محلی معاملات آزمایشی فعال شد."
+          : "🤖 Local paper-trading demo bot activated."
         : state.lang === "fa"
-        ? "ربات معامله‌گر خودکار متوقف شد."
-        : "AI Auto-Quant Bot Paused.",
+        ? "ربات آزمایشی معاملات محلی متوقف شد."
+        : "Local paper-trading demo bot paused.",
     };
   });
 
@@ -464,9 +532,9 @@ const triggerMarketShock = (direction: "PUMP" | "CRASH") => {
 };
 
 const tickMarket = () => {
+  if (!globalState.isLiveStreamActive) return;
   tickCounter++;
   setState((state) => {
-    if (!state.isLiveStreamActive) return {};
     const updatedAssets = { ...state.assets };
     const tf = state.timeframe;
     const isNewCandleTick = tickCounter % 3 === 0;
@@ -478,6 +546,10 @@ const tickMarket = () => {
 
     (Object.keys(updatedAssets) as AssetSymbol[]).forEach((sym) => {
       const item = updatedAssets[sym];
+      if (state.isBinanceConnected && sym !== "NVDA/AI") {
+        updatedAssets[sym] = item;
+        return;
+      }
       const candles = [...item.candlesByTf[tf]];
       const last = { ...candles[candles.length - 1] };
 
@@ -548,16 +620,16 @@ const tickMarket = () => {
       const activeSym = state.selectedSymbol;
       const activePrice = updatedAssets[activeSym].price;
       const tradeUSD = 400;
-      const units = Number(((tradeUSD * 5) / activePrice).toFixed(4));
+      const units = Number((tradeUSD / activePrice).toFixed(4));
       const botOrder: TradeOrder = {
         id: `BOT-${Math.floor(1000 + Math.random() * 9000)}`,
         symbol: activeSym,
         side: "BUY",
         amount: units,
-        leverage: 5,
+        leverage: 1,
         executionPrice: activePrice,
         timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
-        tag: "AI-BOT",
+        tag: "DEMO-BOT",
       };
       nextBalance = Number((state.balanceUSD - tradeUSD).toFixed(2));
       nextHoldings = {
@@ -566,7 +638,7 @@ const tickMarket = () => {
       };
       nextOrders = [botOrder, ...state.orders.slice(0, 14)];
       nextLogs = [
-        `[${nowStr}] AI-BOT :: Executed 5x LONG on ${activeSym} (${units} units @ $${activePrice})`,
+        `[${nowStr}] DEMO-BOT :: Simulated 1x spot BUY on ${activeSym} (${units} units @ ${activePrice})`,
         ...state.aiLogs.slice(0, 12),
       ];
     }
@@ -720,6 +792,8 @@ export function useAuraStore() {
     tickMarket,
     executeOrder,
     closePosition,
+    applyBinanceTickerData,
+    setBinanceConnected,
   };
 }
 

@@ -31,8 +31,8 @@ export default function PortfolioPositions() {
             <Layers className="w-4 h-4 text-cyan-400" />
             <h3 className="text-sm font-bold text-white">
               {lang === "fa"
-                ? "پرتفوی لحظه‌ای و تخصیص سرمایه"
-                : "Live Portfolio Allocation"}
+                ? "پرتفوی آزمایشی و تخصیص سرمایه"
+                : "Demo Paper Portfolio"}
             </h3>
           </div>
           <span className="font-mono text-xs text-slate-400">
@@ -58,7 +58,7 @@ export default function PortfolioPositions() {
                   {lang === "fa" ? "موجودی" : "Balance"}
                 </th>
                 <th className="pb-2 font-medium text-start">
-                  {lang === "fa" ? "قیمت لحظه‌ای" : "Live Price"}
+                  {lang === "fa" ? "قیمت بازار" : "Market Price"}
                 </th>
                 <th className="pb-2 font-medium text-start">
                   {lang === "fa" ? "ارزش دلاری" : "Value (USD)"}
@@ -125,12 +125,12 @@ export default function PortfolioPositions() {
             <History className="w-4 h-4 text-emerald-400" />
             <h3 className="text-sm font-bold text-white">
               {lang === "fa"
-                ? "لاگ تراکنش‌های موتور معاملاتی"
-                : "Real-Time Order Execution Log"}
+                ? "سوابق سفارش‌های آزمایشی محلی"
+                : "Local Paper Order Log"}
             </h3>
           </div>
-          <span className="font-mono text-[11px] text-emerald-400">
-            0ms Latency
+          <span className="font-mono text-[10px] text-amber-300">
+            LOCAL DEMO
           </span>
         </div>
 

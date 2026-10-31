@@ -206,7 +206,7 @@ export default function LiveCanvasChart() {
               {activeAsset.name[lang]}
             </span>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
-              PURE SVG HD v9.5
+              SVG • ILLUSTRATIVE OHLC
             </span>
           </div>
           <div className="flex items-baseline gap-2.5 mt-1">
@@ -283,7 +283,7 @@ export default function LiveCanvasChart() {
             }`}
           >
             <Sparkles className="w-3 h-3" />
-            <span>AI Signals</span>
+            <span>Demo Signals</span>
           </button>
 
           <div className="flex items-center gap-1 bg-[#020408] p-1 rounded-xl border border-cyan-500/25">

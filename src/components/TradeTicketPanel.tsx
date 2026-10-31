@@ -50,8 +50,8 @@ export default function TradeTicketPanel() {
         ok: true,
         msg:
           lang === "fa"
-            ? `سفارش ${side === "BUY" ? "خرید" : "فروش"} ${estimatedUnits} واحد ${selectedSymbol} با موفقیت در موتور معاملاتی ثبت شد.`
-            : `Executed ${side} order for ${estimatedUnits} ${selectedSymbol} instantaneously.`,
+            ? `سفارش آزمایشی ${side === "BUY" ? "خرید" : "فروش"} با موفقیت در حساب محلی ثبت شد.`
+            : `Simulated ${side} paper order for ${selectedSymbol} in the local demo account.`,
       });
     } else {
       setFeedback({
@@ -76,8 +76,8 @@ export default function TradeTicketPanel() {
             <ArrowDownUp className="w-4 h-4 text-emerald-400" />
             <span>
               {lang === "fa"
-                ? "ثبت سفارش آنی (Optimistic UI)"
-                : "Instant Execution Ticket"}
+                ? "ثبت سفارش آزمایشی محلی"
+                : "Local Paper-Trade Ticket"}
             </span>
           </h3>
           <span className="font-mono text-[11px] text-cyan-400">
@@ -106,7 +106,7 @@ export default function TradeTicketPanel() {
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            {lang === "fa" ? "فروش (SHORT / SELL)" : "SELL / SHORT"}
+            {lang === "fa" ? "فروش (SELL)" : "SELL"}
           </button>
         </div>
 
@@ -114,7 +114,7 @@ export default function TradeTicketPanel() {
           <div>
             <div className="flex justify-between text-xs text-slate-400 mb-1.5">
               <span>
-                {lang === "fa" ? "مبلغ تراکنش (USD):" : "Order Value (USD):"}
+                {lang === "fa" ? "مبلغ سفارش آزمایشی (USD):" : "Paper Order Value (USD):"}
               </span>
               <span className="font-mono text-slate-300">
                 {side === "BUY"
@@ -163,8 +163,8 @@ export default function TradeTicketPanel() {
               </span>
             </div>
             <div className="flex justify-between text-slate-400">
-              <span>{lang === "fa" ? "کارمزد شبکه:" : "Zero-Latency Fee:"}</span>
-              <span className="text-emerald-400">0.01% (Quant Tier)</span>
+              <span>{lang === "fa" ? "کارمزد شبیه‌سازی:" : "Fee Model:"}</span>
+              <span className="text-emerald-400">Not applied</span>
             </div>
           </div>
 
@@ -177,8 +177,8 @@ export default function TradeTicketPanel() {
             }`}
           >
             {lang === "fa"
-              ? `ثبت آنی سفارش ${side === "BUY" ? "خرید" : "فروش"} ${selectedSymbol}`
-              : `Execute Instant ${side} • ${selectedSymbol}`}
+              ? `شبیه‌سازی سفارش ${side === "BUY" ? "خرید" : "فروش"} ${selectedSymbol}`
+              : `Simulate ${side} • ${selectedSymbol}`}
           </button>
         </form>
 
@@ -204,7 +204,7 @@ export default function TradeTicketPanel() {
         <div className="relative h-28 w-full rounded-xl overflow-hidden bg-gradient-to-br from-emerald-500/20 via-slate-900 to-cyan-500/20 border border-white/10 flex items-center justify-center">
           <img
             src="/aurapulse/assets/quant-core.webp"
-            alt="AI Quant Risk Engine"
+            alt="Illustrative risk-metrics graphic"
             className="w-full h-full object-cover opacity-85"
             onError={(e) => {
               const target = e.currentTarget;
@@ -220,11 +220,11 @@ export default function TradeTicketPanel() {
             <span className="flex items-center gap-1.5 text-xs font-bold text-white">
               <Cpu className="w-4 h-4 text-cyan-400" />
               {lang === "fa"
-                ? "موتور تحلیل ریسک کوانتومی"
-                : "Neural Quant Risk Engine"}
+                ? "شاخص‌های نمونه ریسک"
+                : "Sample Risk Metrics"}
             </span>
             <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-              AI ACTIVE
+              DEMO METRICS
             </span>
           </div>
         </div>
@@ -248,8 +248,8 @@ export default function TradeTicketPanel() {
             <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
             <span>
               {lang === "fa"
-                ? `سیگنال الگوریتمی برای ${selectedSymbol}: نقدینگی سفارشات در ناحیه تعادل قرار دارد و جریان سفارشات نهادی مثبت ارزیابی می‌شود.`
-                : `Algorithmic Telemetry for ${selectedSymbol}: Order-book depth indicates institutional accumulation with low slippage risk.`}
+                ? `شاخص‌های نمایشی ${selectedSymbol} از داده‌های نمونه ساخته شده‌اند و تحلیل جریان نهادی یا لغزش واقعی بازار نیستند.`
+                : `Illustrative demo metrics for ${selectedSymbol}; not institutional order flow or a live slippage estimate.`}
             </span>
           </p>
         </div>

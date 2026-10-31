@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useAuraStore, AssetSymbol } from "../store/useAuraStore";
+import { useAuraStore, AssetSymbol, BinanceMarketUpdate } from "../store/useAuraStore";
 import TopNav from "../components/TopNav";
 import LiveCanvasChart from "../components/LiveCanvasChart";
 import OrderBookPanel from "../components/OrderBookPanel";
@@ -10,6 +10,15 @@ import PortfolioPositions from "../components/PortfolioPositions";
 import CommandPaletteModal from "../components/CommandPaletteModal";
 import SmartAssetImage from "../components/SmartAssetImage";
 import { Cpu, ExternalLink, Flame, Terminal } from "lucide-react";
+
+type BinanceTickerRow = {
+  symbol: string;
+  lastPrice: string;
+  priceChangePercent: string;
+  highPrice: string;
+  lowPrice: string;
+  quoteVolume: string;
+};
 
 export default function AuraPulseTerminalPage() {
   const {
@@ -22,44 +31,80 @@ export default function AuraPulseTerminalPage() {
     setWorkspace,
     aiLogs,
     triggerMarketShock,
+    applyBinanceTickerData,
+    setBinanceConnected,
+    isBinanceConnected,
   } = useAuraStore();
 
-  // اتصال به API واقعی صرافی بایننس برای دریافت قیمت زنده BTC, ETH, SOL در کنار موتور شبیه‌ساز
+  // Public Binance 24h tickers are read-only; order placement remains local paper trading.
   useEffect(() => {
-    const fetchLivePrices = async () => {
+    let active = true;
+    let pollTimer: ReturnType<typeof setTimeout> | undefined;
+    let controller: AbortController | null = null;
+
+    const fetchMarketData = async () => {
+      controller = new AbortController();
       try {
         const res = await fetch(
-          "https://api.binance.com/api/v3/ticker/price?symbols=%5B%22BTCUSDT%22,%22ETHUSDT%22,%22SOLUSDT%22%5D"
+          "https://api.binance.com/api/v3/ticker/24hr?symbols=%5B%22BTCUSDT%22%2C%22ETHUSDT%22%2C%22SOLUSDT%22%5D",
+          { signal: controller.signal, cache: "no-store" }
         );
-        if (!res.ok) return;
-        const data: { symbol: string; price: string }[] = await res.json();
-        const map: Partial<Record<AssetSymbol, number>> = {};
-        data.forEach((item) => {
-          if (item.symbol === "BTCUSDT") map["BTC/USD"] = parseFloat(item.price);
-          if (item.symbol === "ETHUSDT") map["ETH/USD"] = parseFloat(item.price);
-          if (item.symbol === "SOLUSDT") map["SOL/USD"] = parseFloat(item.price);
-        });
-        (Object.keys(map) as AssetSymbol[]).forEach((sym) => {
-          const liveP = map[sym];
-          if (liveP && liveP > 0 && assets[sym]) {
-            assets[sym].price = Number(liveP.toFixed(2));
+        if (!res.ok) throw new Error(`Binance returned HTTP ${res.status}`);
+
+        const rows = (await res.json()) as BinanceTickerRow[];
+        const updates: Partial<Record<AssetSymbol, BinanceMarketUpdate>> = {};
+        rows.forEach((row) => {
+          const mapping: Record<string, AssetSymbol> = {
+            BTCUSDT: "BTC/USD",
+            ETHUSDT: "ETH/USD",
+            SOLUSDT: "SOL/USD",
+          };
+          const symbol = mapping[row.symbol];
+          const price = Number(row.lastPrice);
+          const change24h = Number(row.priceChangePercent);
+          const high24h = Number(row.highPrice);
+          const low24h = Number(row.lowPrice);
+          const quoteVolume = Number(row.quoteVolume);
+          if (
+            symbol &&
+            Number.isFinite(price) && price > 0 &&
+            Number.isFinite(change24h) &&
+            Number.isFinite(high24h) && Number.isFinite(low24h)
+          ) {
+            updates[symbol] = {
+              price,
+              change24h,
+              high24h,
+              low24h,
+              volume24h: Number.isFinite(quoteVolume)
+                ? `${quoteVolume.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                : "—",
+            };
           }
         });
-      } catch {
-        // در صورت محدودیت شبکه، موتور استوکاستیک داخلی بدون وقفه ادامه می‌دهد
+
+        if (active) {
+          if (Object.keys(updates).length > 0) applyBinanceTickerData(updates);
+          else setBinanceConnected(false);
+        }
+      } catch (error) {
+        if (active && !(error instanceof DOMException && error.name === "AbortError")) {
+          setBinanceConnected(false);
+        }
+      } finally {
+        if (active) pollTimer = setTimeout(fetchMarketData, 10000);
       }
     };
 
-    fetchLivePrices();
-    const apiInterval = setInterval(fetchLivePrices, 10000);
-    const interval = setInterval(() => {
-      tickMarket();
-    }, 1400);
+    void fetchMarketData();
+    const simulationTimer = setInterval(tickMarket, 1400);
     return () => {
-      clearInterval(apiInterval);
-      clearInterval(interval);
+      active = false;
+      controller?.abort();
+      if (pollTimer) clearTimeout(pollTimer);
+      clearInterval(simulationTimer);
     };
-  }, [tickMarket, assets]);
+  }, [tickMarket, applyBinanceTickerData, setBinanceConnected]);
 
   const themeClass =
     theme === "PURPLE"
@@ -102,12 +147,14 @@ export default function AuraPulseTerminalPage() {
                 <Flame className="w-5 h-5 text-emerald-400" />
                 <h2 className="text-base font-bold text-white">
                   {lang === "fa"
-                    ? "نقشه حرارتی زنده نقدینگی و جریان پول هوشمند"
-                    : "Real-Time Institutional Market Heatmap"}
+                    ? "نقشه بازار و نمایش وضعیت داده‌های آزمایشی"
+                    : "Market Data & Paper-Trading Heatmap"}
                 </h2>
               </div>
               <span className="text-xs font-mono text-cyan-300">
-                LIVE BINANCE FEED + QUANT ENGINE
+                {isBinanceConnected
+                  ? "BINANCE LIVE: BTC / ETH / SOL • NVDA/AI: SYNTHETIC"
+                  : "SIMULATED FALLBACK • WAITING FOR BINANCE"}
               </span>
             </div>
 

@@ -1,8 +1,24 @@
-# AuraPulse — Quantitative FinTech & Paper Trading Terminal
-**Lead Architect:** Pooya Goodarzi (Computer Engineering)  
-**Live Demo:** [https://pooya16pg-spec.github.io/aurapulse/](https://pooya16pg-spec.github.io/aurapulse/)
+# AuraPulse — Market Dashboard & Paper-Trading Simulator
 
-## Engineering Case Study
-1. **Live Market API Integration + Fallback Engine:** Connects to public crypto market ticker feeds (Binance / CoinGecko REST endpoints) for real-time BTC/ETH/SOL spot pricing with seamless fallback to a deterministic mean-reverting stochastic model.
-2. **Persistent Paper Trading Engine:** Full optimistic order execution (1x–25x leverage), liquidation threshold calculation, and `localStorage` state persistence.
-3. **Zero-Dependency Pure SVG Vector Charting:** Renders OHLC Candlesticks, Bollinger Bands (20, 2), EMA 9/21, and RSI(14) without canvas blur on high-DPI Android displays.
+**Author:** Pooya Goodarzi  
+**Live site:** https://pooya16pg-spec.github.io/aurapulse/
+
+AuraPulse is a browser-only market dashboard and paper-trading demonstration.
+
+## Market data
+- The app polls Binance's public 24-hour ticker endpoint for BTC, ETH, and SOL.
+- The feed is read-only. If the request is blocked, unavailable, or rate-limited, the interface marks the market as simulated and falls back to its local price model.
+- `NVDA/AI` is a synthetic demo instrument, not a listed Binance symbol.
+- The initial portfolio, historical candles, order book depth, AI-style signals, and demo logs are illustrative. They are not institutional exchange data.
+
+## Paper trading
+- Orders update an in-memory browser demo account only.
+- No real trades, exchange credentials, deposits, withdrawals, liquidation engine, persistent storage, or private API are implemented.
+- The local demo bot simulates spot buys. It does not execute an autonomous strategy against an exchange.
+
+## Technology
+- Next.js 14 static export, React 18, TypeScript, and Tailwind CSS.
+- Custom SVG candlestick visualization with EMA, Bollinger, volume, and RSI display layers.
+- Public Binance ticker requests originate from the visitor's browser; feed access depends on network and endpoint availability.
+
+**Important:** This project is an educational UI prototype, not an investment tool or a source of financial advice.
