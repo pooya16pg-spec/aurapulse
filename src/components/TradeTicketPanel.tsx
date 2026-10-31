@@ -58,8 +58,8 @@ export default function TradeTicketPanel() {
         ok: false,
         msg:
           lang === "fa"
-            ? "موجودی کافی برای انجام این تراکنش وجود ندارد."
-            : "Insufficient balance or asset holdings for this order.",
+            ? "موجودی کافی نیست یا مقدار سفارش معتبر نیست."
+            : "Insufficient cash, invalid size, or asset holdings for this paper order.",
       });
     }
     setTimeout(() => setFeedback(null), 4000);
@@ -163,8 +163,8 @@ export default function TradeTicketPanel() {
               </span>
             </div>
             <div className="flex justify-between text-slate-400">
-              <span>{lang === "fa" ? "کارمزد شبیه‌سازی:" : "Fee Model:"}</span>
-              <span className="text-emerald-400">Not applied</span>
+              <span>{lang === "fa" ? "کارمزد نمونه:" : "Demo fee:"}</span>
+              <span className="text-emerald-400">0.10% • local</span>
             </div>
           </div>
 
