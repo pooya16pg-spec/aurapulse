@@ -50,8 +50,8 @@ export default function TradeTicketPanel() {
         ok: true,
         msg:
           lang === "fa"
-            ? `سفارش ${side === "BUY" ? "خرید" : "فروش"} ${estimatedUnits} واحد ${selectedSymbol} با موفقیت در موتور معاملاتی ثبت شد.`
-            : `Executed ${side} order for ${estimatedUnits} ${selectedSymbol} instantaneously.`,
+            ? `سفارش آزمایشی ${side === "BUY" ? "خرید" : "فروش"} با موفقیت در حساب محلی ثبت شد.`
+            : `Simulated ${side} paper order for ${selectedSymbol} in the local demo account.`,
       });
     } else {
       setFeedback({
@@ -177,8 +177,8 @@ export default function TradeTicketPanel() {
             }`}
           >
             {lang === "fa"
-              ? `ثبت آنی سفارش ${side === "BUY" ? "خرید" : "فروش"} ${selectedSymbol}`
-              : `Execute Instant ${side} • ${selectedSymbol}`}
+              ? `شبیه‌سازی سفارش ${side === "BUY" ? "خرید" : "فروش"} ${selectedSymbol}`
+              : `Simulate ${side} • ${selectedSymbol}`}
           </button>
         </form>
 
@@ -224,7 +224,7 @@ export default function TradeTicketPanel() {
                 : "Neural Quant Risk Engine"}
             </span>
             <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-              AI ACTIVE
+              DEMO METRICS
             </span>
           </div>
         </div>
@@ -248,8 +248,8 @@ export default function TradeTicketPanel() {
             <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
             <span>
               {lang === "fa"
-                ? `سیگنال الگوریتمی برای ${selectedSymbol}: نقدینگی سفارشات در ناحیه تعادل قرار دارد و جریان سفارشات نهادی مثبت ارزیابی می‌شود.`
-                : `Algorithmic Telemetry for ${selectedSymbol}: Order-book depth indicates institutional accumulation with low slippage risk.`}
+                ? `شاخص‌های نمایشی ${selectedSymbol} از داده‌های نمونه ساخته شده‌اند و تحلیل جریان نهادی یا لغزش واقعی بازار نیستند.`
+                : `Illustrative demo metrics for ${selectedSymbol}; not institutional order flow or a live slippage estimate.`}
             </span>
           </p>
         </div>
