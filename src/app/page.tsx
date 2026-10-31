@@ -118,7 +118,7 @@ export default function AuraPulseTerminalPage() {
   const symbols = Object.keys(assets) as AssetSymbol[];
 
   return (
-    <div className={`min-h-[100svh] ${themeClass} flex flex-col overflow-x-clip`}>
+    <div className={`aurapulse-page min-h-[100svh] min-h-[100dvh] ${themeClass} flex flex-col overflow-x-clip`}>
       <TopNav />
 
       <main className="flex-1 max-w-[1720px] w-full mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 space-y-4 sm:space-y-5 min-w-0 pb-[calc(1rem+env(safe-area-inset-bottom))]">

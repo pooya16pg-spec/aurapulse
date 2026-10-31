@@ -347,7 +347,7 @@ export default function LiveCanvasChart() {
 
       <div
         dir="ltr"
-        className="relative w-full rounded-xl bg-[#020409] border border-white/15 overflow-hidden select-none"
+        className="aurapulse-chart relative w-full rounded-xl bg-[#020409] border border-white/15 overflow-hidden select-none"
       >
         <div className="flex items-stretch h-[300px] sm:h-[365px]">
           <div className="relative flex-1 min-w-0">
