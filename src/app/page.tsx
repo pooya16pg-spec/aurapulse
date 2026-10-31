@@ -33,11 +33,13 @@ export default function AuraPulseTerminalPage() {
     triggerMarketShock,
     applyBinanceTickerData,
     setBinanceConnected,
+    hydratePaperAccount,
     isBinanceConnected,
   } = useAuraStore();
 
   // Public Binance 24h tickers are read-only; order placement remains local paper trading.
   useEffect(() => {
+    hydratePaperAccount();
     let active = true;
     let pollTimer: ReturnType<typeof setTimeout> | undefined;
     let controller: AbortController | null = null;
@@ -104,7 +106,7 @@ export default function AuraPulseTerminalPage() {
       if (pollTimer) clearTimeout(pollTimer);
       clearInterval(simulationTimer);
     };
-  }, [tickMarket, applyBinanceTickerData, setBinanceConnected]);
+  }, [tickMarket, applyBinanceTickerData, setBinanceConnected, hydratePaperAccount]);
 
   const themeClass =
     theme === "PURPLE"
@@ -238,8 +240,8 @@ export default function AuraPulseTerminalPage() {
                   className="btn-cyber px-4 py-2.5 rounded-xl font-mono text-xs font-bold"
                 >
                   {lang === "fa"
-                    ? "بازگشت به چارت زنده"
-                    : "Return to Live Chart"}
+                    ? "بازگشت به داشبورد بازار"
+                    : "Return to Market Dashboard"}
                 </button>
               </div>
             </div>
@@ -250,8 +252,8 @@ export default function AuraPulseTerminalPage() {
                   <Terminal className="w-4 h-4 text-emerald-400" />
                   <h3 className="text-sm font-bold text-white">
                     {lang === "fa"
-                      ? "لاگ زنده تلمتری و API"
-                      : "Live Execution Telemetry"}
+                      ? "گزارش فعالیت شبیه‌ساز محلی"
+                      : "Local Simulator Activity"}
                   </h3>
                 </div>
               </div>
