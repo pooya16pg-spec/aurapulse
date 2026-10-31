@@ -48,9 +48,9 @@ export default function PortfolioPositions() {
         </div>
         <div className="grid grid-cols-2 xl:grid-cols-5 gap-2.5">
           {[
-            { label: lang === "fa" ? "ارزش خالص" : "Account equity", value: `${netWorthUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: "text-white" },
-            { label: lang === "fa" ? "موجودی نقد" : "Cash balance", value: `${balanceUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: "text-cyan-300" },
-            { label: lang === "fa" ? "ارزش موقعیت‌ها" : "Position value", value: `${totalHoldingsUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: "text-white" },
+            { label: lang === "fa" ? "ارزش خالص" : "Account equity", value: "$" + netWorthUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), tone: "text-white" },
+            { label: lang === "fa" ? "موجودی نقد" : "Cash balance", value: "$" + balanceUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), tone: "text-cyan-300" },
+            { label: lang === "fa" ? "ارزش موقعیت‌ها" : "Position value", value: "$" + totalHoldingsUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), tone: "text-white" },
             { label: lang === "fa" ? "سود/زیان باز" : "Unrealized P&L", value: `${unrealizedPnlUSD >= 0 ? "+$" : "-$"}${Math.abs(unrealizedPnlUSD).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: pnlTone(unrealizedPnlUSD) },
             { label: lang === "fa" ? "سود/زیان تحقق‌یافته" : "Realized P&L", value: `${realizedPnlUSD >= 0 ? "+$" : "-$"}${Math.abs(realizedPnlUSD).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, tone: pnlTone(realizedPnlUSD) },
           ].map((item) => (
@@ -214,6 +214,7 @@ export default function PortfolioPositions() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );
