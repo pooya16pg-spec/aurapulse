@@ -1,11 +1,13 @@
-﻿import type { Metadata } from "next";
+﻿import type { Metadata, Viewport } from "next";
 // @ts-ignore
 import "./globals.css";
+
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#020408" };
 
 export const metadata: Metadata = {
   title: "AuraPulse | Pooya Goodarzi — FinTech & Quant Analytics Terminal",
   description:
-    "Real-Time Quantitative Analytics & Algorithmic Trading Terminal engineered by Pooya Goodarzi.",
+    "Responsive market-data and local paper-trading workspace by Pooya Goodarzi.",
 };
 
 export default function RootLayout({
