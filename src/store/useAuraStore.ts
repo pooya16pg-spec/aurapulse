@@ -767,7 +767,7 @@ const tickMarket = () => {
       const previousUnits = state.holdings[activeSym];
       const nextUnits = Number((previousUnits + units).toFixed(6));
       const nextAverage = nextUnits > 0
-        ? Number(((previousUnits * state.avgEntryPrices[activeSym] + units * activePrice) / nextUnits).toFixed(4))
+        ? Number(((previousUnits * state.avgEntryPrices[activeSym] + units * activePrice + feeUSD) / nextUnits).toFixed(4))
         : activePrice;
       const botOrder: TradeOrder = {
         id: `BOT-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -840,7 +840,7 @@ const executeOrder = (
     const newQty = Number((prevQty + units).toFixed(6));
     const newAvg =
       newQty > 0
-        ? Number(((prevQty * prevAvg + units * execPrice) / newQty).toFixed(4))
+        ? Number(((prevQty * prevAvg + units * execPrice + feeUSD) / newQty).toFixed(4))
         : execPrice;
 
     const newOrder: TradeOrder = {
