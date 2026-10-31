@@ -50,7 +50,7 @@ export default function TopNav() {
             <span className="font-mono font-bold tracking-wider text-white text-sm shrink-0">
               AuraPulse
             </span>
-            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${isBinanceConnected ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30" : "bg-amber-400/10 text-amber-200 border-amber-400/30"}`}>
+            <span className={`hidden sm:inline text-[10px] font-mono px-1.5 py-0.5 rounded border ${isBinanceConnected ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30" : "bg-amber-400/10 text-amber-200 border-amber-400/30"}`}>
               {isBinanceConnected ? "BINANCE FEED" : "SIMULATED"}
             </span>
           </div>
@@ -111,7 +111,7 @@ export default function TopNav() {
           <button
             onClick={toggleLiveStream}
             title={lang === "fa" ? "توقف یا ادامهٔ شبیه‌سازی محلی؛ دریافت قیمت بایننس ادامه دارد." : "Pause or resume the local demo simulator. Binance price polling continues."}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono border transition-all ${
+            className={`min-h-10 min-w-10 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-mono border transition-all ${
               isLiveStreamActive
                 ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
                 : "bg-amber-500/15 border-amber-500/40 text-amber-300"
