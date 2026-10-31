@@ -144,7 +144,9 @@ html {
 body {
   min-width: 320px;
   min-height: 100svh;
+  min-height: 100dvh;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
   overscroll-behavior-x: none;
 }
 button, a, input, textarea, select { touch-action: manipulation; }
