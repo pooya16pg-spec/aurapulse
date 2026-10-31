@@ -446,8 +446,8 @@ const toggleAutoBot = () =>
       aiLogs: [
         `[${now}] AUTO-BOT :: ${
           next
-            ? "Autonomous Neural Execution Engine ENABLED (5x Scalping Mode)"
-            : "Autonomous Engine PAUSED by user"
+            ? "Local 1x spot paper-trading simulation ENABLED"
+            : "Local paper-trading demo bot PAUSED by user"
         }`,
         ...state.aiLogs.slice(0, 12),
       ],
@@ -456,8 +456,8 @@ const toggleAutoBot = () =>
           ? "🤖 شبیه‌ساز محلی معاملات آزمایشی فعال شد."
           : "🤖 Local paper-trading demo bot activated."
         : state.lang === "fa"
-        ? "ربات معامله‌گر خودکار متوقف شد."
-        : "AI Auto-Quant Bot Paused.",
+        ? "ربات آزمایشی معاملات محلی متوقف شد."
+        : "Local paper-trading demo bot paused.",
     };
   });
 
@@ -629,7 +629,7 @@ const tickMarket = () => {
         leverage: 1,
         executionPrice: activePrice,
         timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
-        tag: "AI-BOT",
+        tag: "DEMO-BOT",
       };
       nextBalance = Number((state.balanceUSD - tradeUSD).toFixed(2));
       nextHoldings = {
