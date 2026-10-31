@@ -40,6 +40,8 @@ export interface AssetInfo {
   volatilityRisk: number;
   whaleScore: number;
   stepSize: number;
+  history: number[];
+  candles: CandlePoint[];
   candlesByTf: Record<Timeframe, CandlePoint[]>;
   asks: OrderBookLevel[];
   bids: OrderBookLevel[];
@@ -200,6 +202,8 @@ function makeAsset(
     volatilityRisk,
     whaleScore,
     stepSize,
+    history: activeCandles.map((c) => c.close),
+    candles: activeCandles,
     candlesByTf,
     asks,
     bids,
@@ -381,7 +385,7 @@ const toggleAutoBot = () =>
       ],
       lastNotification: next
         ? state.lang === "fa"
-          ? "🤖 ربات معامله‌گر خودکار کوانتومی فعال شد و هر چند ثانیه ترید می‌کند!"
+          ? "🤖 ربات معامله‌گر خودکار کوانتومی فعال شد!"
           : "🤖 AI Auto-Quant Trading Bot Activated!"
         : state.lang === "fa"
         ? "ربات معامله‌گر خودکار متوقف شد."
@@ -397,9 +401,7 @@ const triggerMarketShock = (direction: "PUMP" | "CRASH") => {
     const candles = [...item.candlesByTf[tf]];
     const last = candles[candles.length - 1];
 
-    // جهش استاندارد متناسب با گام نمودار تا مقیاس سایر کندل‌ها خراب نشود
-    const move =
-      (direction === "PUMP" ? 1 : -1) * item.stepSize * 3.2;
+    const move = (direction === "PUMP" ? 1 : -1) * item.stepSize * 3.2;
     const nextClose = Number(Math.max(item.stepSize * 4, last.close + move).toFixed(2));
     const open = last.close;
     const high = Number((Math.max(open, nextClose) + item.stepSize * 1.1).toFixed(2));
@@ -432,10 +434,10 @@ const triggerMarketShock = (direction: "PUMP" | "CRASH") => {
       lastNotification:
         direction === "PUMP"
           ? state.lang === "fa"
-            ? `🚀 موج خرید نهنگ‌ها روی ${sym} تزریق شد (قیمت جدید: $${nextClose.toLocaleString("en-US")})`
+            ? `🚀 موج خرید نهنگ‌ها روی ${sym} تزریق شد ($${nextClose.toLocaleString("en-US")})`
             : `🚀 Whale Bull Wave injected into ${sym} ($${nextClose.toLocaleString("en-US")})`
           : state.lang === "fa"
-          ? `⚡ تست استرس ریزش روی ${sym} اعمال شد (قیمت جدید: $${nextClose.toLocaleString("en-US")})`
+          ? `⚡ تست استرس ریزش روی ${sym} اعمال شد ($${nextClose.toLocaleString("en-US")})`
           : `⚡ Flash Stress-Test triggered on ${sym} ($${nextClose.toLocaleString("en-US")})`,
       assets: {
         ...state.assets,
@@ -447,6 +449,8 @@ const triggerMarketShock = (direction: "PUMP" | "CRASH") => {
           ),
           high24h: Math.max(item.high24h, high),
           low24h: Math.min(item.low24h, low),
+          history: nextCandles.map((c) => c.close),
+          candles: nextCandles,
           candlesByTf: {
             ...item.candlesByTf,
             [tf]: nextCandles,
@@ -477,7 +481,6 @@ const tickMarket = () => {
       const candles = [...item.candlesByTf[tf]];
       const last = { ...candles[candles.length - 1] };
 
-      // میانگین ۱۰ کندل آخر برای حفظ تعادل طبیعی نمودار
       const recentSlice = candles.slice(-10);
       const recentAvg =
         recentSlice.reduce((s, c) => s + c.close, 0) / recentSlice.length;
@@ -525,6 +528,8 @@ const tickMarket = () => {
         change24h: Number((item.change24h + deltaPct * 0.5).toFixed(2)),
         high24h: Math.max(item.high24h, nextClose),
         low24h: Math.min(item.low24h, nextClose),
+        history: nextCandles.map((c) => c.close),
+        candles: nextCandles,
         candlesByTf: {
           ...item.candlesByTf,
           [tf]: nextCandles,
@@ -679,7 +684,7 @@ const closePosition = (sym: AssetSymbol) => {
     orders: [closeOrd, ...state.orders.slice(0, 14)],
     lastNotification:
       state.lang === "fa"
-        ? `✅ پوزیشن ${sym} به ارزش $${usdValue.toLocaleString("en-US")} با موفقیت تسویه و به موجودی نقد اضافه شد!`
+        ? `✅ پوزیشن ${sym} به ارزش $${usdValue.toLocaleString("en-US")} تسویه شد!`
         : `✅ Closed ${sym} position for $${usdValue.toLocaleString("en-US")}!`,
   }));
 };

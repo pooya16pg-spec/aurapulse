@@ -19,97 +19,84 @@ body {
   padding: 0;
 }
 
-/* حذف کامل استایل خاکستری پیش‌فرض مرورگر از روی تمام دکمه‌ها */
 button {
   appearance: none;
   -webkit-appearance: none;
-  background-color: transparent;
-  border: none;
-  color: inherit;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-/* سیستم دکمه‌های نئونی و شیشه‌ای مدرن (Cyber Glass UI) */
-.btn-cyber {
-  background: linear-gradient(135deg, rgba(14, 24, 42, 0.92) 0%, rgba(7, 13, 25, 0.98) 100%);
+  background-color: rgba(14, 24, 42, 0.9);
   border: 1px solid rgba(0, 240, 255, 0.25);
   color: #e2e8f0;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.btn-cyber:hover {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(0, 240, 255, 0.18) 100%);
+
+button:hover {
   border-color: rgba(0, 240, 255, 0.65);
   color: #ffffff;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-cyber {
+  background: linear-gradient(135deg, rgba(14, 24, 42, 0.92) 0%, rgba(7, 13, 25, 0.98) 100%) !important;
+  border: 1px solid rgba(0, 240, 255, 0.28) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.btn-cyber:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.24) 0%, rgba(0, 240, 255, 0.2) 100%) !important;
+  border-color: rgba(0, 240, 255, 0.75) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.3);
   transform: translateY(-1px);
 }
 
 .btn-cyber-active {
-  background: linear-gradient(135deg, #10B981 0%, #00F0FF 100%);
-  border: 1px solid #6EE7B7;
+  background: linear-gradient(135deg, #10B981 0%, #00F0FF 100%) !important;
+  border: 1px solid #6EE7B7 !important;
   color: #02060D !important;
-  font-weight: 800;
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  transition: all 0.2s ease;
-}
-.btn-cyber-active:hover {
-  filter: brightness(1.08);
-  box-shadow: 0 0 32px rgba(0, 240, 255, 0.65);
-  transform: translateY(-1px);
+  font-weight: 800 !important;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .btn-cyber-purple {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.24) 0%, rgba(79, 70, 229, 0.18) 100%);
-  border: 1px solid rgba(192, 132, 252, 0.5);
-  color: #f3e8ff;
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
-}
-.btn-cyber-purple:hover {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.38) 0%, rgba(0, 240, 255, 0.24) 100%);
-  border-color: #e879f9;
-  box-shadow: 0 0 26px rgba(168, 85, 247, 0.45);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.28) 0%, rgba(79, 70, 229, 0.22) 100%) !important;
+  border: 1px solid rgba(192, 132, 252, 0.55) !important;
+  color: #f3e8ff !important;
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.25);
 }
 
 .btn-cyber-danger {
-  background: linear-gradient(135deg, rgba(244, 63, 94, 0.24) 0%, rgba(159, 18, 57, 0.18) 100%);
-  border: 1px solid rgba(251, 113, 133, 0.5);
-  color: #ffe4e6;
-  box-shadow: 0 0 20px rgba(244, 63, 94, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  transition: all 0.2s ease;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.28) 0%, rgba(159, 18, 57, 0.22) 100%) !important;
+  border: 1px solid rgba(251, 113, 133, 0.55) !important;
+  color: #ffe4e6 !important;
+  box-shadow: 0 0 18px rgba(244, 63, 94, 0.25);
 }
 .btn-cyber-danger:hover {
-  background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%);
-  border-color: #FDA4AF;
-  color: #ffffff;
-  box-shadow: 0 0 28px rgba(244, 63, 94, 0.55);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%) !important;
+  color: #ffffff !important;
 }
 
-/* ادغام هولوگرافیک عکس دوم در دیزاین سایت (بدون مرز مستطیلی تیز) */
 .hologram-banner {
   position: relative;
-  height: 148px;
+  height: 136px;
+  max-height: 136px;
   width: 100%;
   overflow: hidden;
   border-radius: 14px;
-  background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.18), rgba(2, 4, 8, 0.98) 78%);
-  border: 1px solid rgba(0, 240, 255, 0.22);
+  background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.2), rgba(2, 4, 8, 0.98) 78%);
+  border: 1px solid rgba(0, 240, 255, 0.25);
 }
 
 .hologram-img-blend {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  width: 100% !important;
+  height: 136px !important;
+  max-height: 136px !important;
+  object-fit: cover !important;
+  object-position: center !important;
   mix-blend-mode: lighten;
-  opacity: 0.88;
+  opacity: 0.85;
   filter: contrast(1.12) saturate(1.15);
-  -webkit-mask-image: radial-gradient(ellipse 88% 82% at 50% 48%, #000 42%, transparent 98%);
-  mask-image: radial-gradient(ellipse 88% 82% at 50% 48%, #000 42%, transparent 98%);
+  -webkit-mask-image: radial-gradient(ellipse 88% 82% at 50% 48%, #000 40%, transparent 98%);
+  mask-image: radial-gradient(ellipse 88% 82% at 50% 48%, #000 40%, transparent 98%);
 }
 
 .spatial-bg-emerald {
@@ -128,10 +115,9 @@ button {
   background-image:
     radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.18) 0px, transparent 45%),
     radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.14) 0px, transparent 45%),
-    radial-gradient(at 50% 100%, rgba(0, 240, 255, 0.10) 0px, transparent 50%),
     linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+  background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
 }
 
 .spatial-bg-gold {
@@ -148,23 +134,4 @@ button {
   background: linear-gradient(160deg, rgba(12, 19, 34, 0.9) 0%, rgba(4, 7, 15, 0.97) 100%);
   box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(20px);
-}
-
-.cyber-card-glow {
-  box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.25), inset 0 1px 0 0 rgba(0, 240, 255, 0.3);
-}
-
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(5, 8, 16, 0.8);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 240, 255, 0.6);
 }

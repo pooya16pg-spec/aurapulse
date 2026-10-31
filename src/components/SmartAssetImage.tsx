@@ -5,6 +5,8 @@ import React, { useState } from "react";
 interface SmartAssetImageProps {
   baseName: "pooya-fintech" | "quant-core";
   alt: string;
+  width?: number | string;
+  height?: number | string;
   className?: string;
   style?: React.CSSProperties;
   fallback: React.ReactNode;
@@ -22,6 +24,8 @@ const CANDIDATE_PATHS = (name: string) => [
 export default function SmartAssetImage({
   baseName,
   alt,
+  width,
+  height,
   className = "w-full h-full object-cover",
   style,
   fallback,
@@ -38,6 +42,8 @@ export default function SmartAssetImage({
     <img
       src={paths[idx]}
       alt={alt}
+      width={width}
+      height={height}
       className={className}
       style={style}
       onError={() => {
