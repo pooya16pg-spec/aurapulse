@@ -58,7 +58,7 @@ export default function PortfolioPositions() {
                   {lang === "fa" ? "موجودی" : "Balance"}
                 </th>
                 <th className="pb-2 font-medium text-start">
-                  {lang === "fa" ? "قیمت لحظه‌ای" : "Live Price"}
+                  {lang === "fa" ? "قیمت بازار" : "Market Price"}
                 </th>
                 <th className="pb-2 font-medium text-start">
                   {lang === "fa" ? "ارزش دلاری" : "Value (USD)"}
