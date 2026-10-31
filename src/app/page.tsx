@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useAuraStore } from "@/store/useAuraStore";
-import TopNav from "@/components/TopNav";
-import LiveCanvasChart from "@/components/LiveCanvasChart";
-import TradeTicketPanel from "@/components/TradeTicketPanel";
-import PortfolioPositions from "@/components/PortfolioPositions";
-import CommandPaletteModal from "@/components/CommandPaletteModal";
+import { useAuraStore } from "../store/useAuraStore";
+import TopNav from "../components/TopNav";
+import LiveCanvasChart from "../components/LiveCanvasChart";
+import TradeTicketPanel from "../components/TradeTicketPanel";
+import PortfolioPositions from "../components/PortfolioPositions";
+import CommandPaletteModal from "../components/CommandPaletteModal";
 
 export default function AuraPulseTerminalPage() {
   const { tickMarket } = useAuraStore();
