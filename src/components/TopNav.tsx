@@ -109,27 +109,34 @@ export default function TopNav() {
       {/* نوار تیکر زنده نئونی */}
       <div className="bg-[#010204] border-b border-white/10 px-3 lg:px-8 py-1.5 text-[11px] font-mono">
         <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-4 overflow-x-auto">
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 font-bold">
+          <div className="flex items-center gap-2.5 shrink-0">
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 font-bold">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-              SPATIAL QUANT OS v8.5
+              QUANTUM ENGINE v9.0
             </span>
             {symbols.map((sym) => {
               const a = assets[sym];
               const up = a.change24h >= 0;
+              const active = selectedSymbol === sym;
               return (
                 <button
                   key={sym}
                   onClick={() => setSelectedSymbol(sym)}
-                  className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg transition-all ${
-                    selectedSymbol === sym
-                      ? "bg-white/15 text-white border border-cyan-400/50"
-                      : "text-slate-400 hover:text-white"
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all ${
+                    active ? "btn-cyber-active" : "btn-cyber"
                   }`}
                 >
-                  <span className="font-bold text-white">{sym}</span>
+                  <span className="font-bold">{sym}</span>
                   <span>${a.price.toLocaleString("en-US")}</span>
-                  <span className={up ? "text-emerald-400" : "text-rose-400"}>
+                  <span
+                    className={
+                      active
+                        ? "text-slate-950 font-extrabold"
+                        : up
+                        ? "text-emerald-400"
+                        : "text-rose-400"
+                    }
+                  >
                     {up ? "+" : ""}
                     {a.change24h}%
                   </span>
@@ -138,8 +145,8 @@ export default function TopNav() {
             })}
           </div>
           <div className="hidden xl:flex items-center gap-4 text-slate-400 shrink-0">
-            <span className="text-cyan-300">Engine: Pure Vector HD 144Hz</span>
-            <span>Lead Architect: Pooya Goodarzi</span>
+            <span className="text-cyan-300">Vector HD 144Hz</span>
+            <span>Architect: Pooya Goodarzi</span>
           </div>
         </div>
       </div>
@@ -154,33 +161,45 @@ export default function TopNav() {
                 AuraPulse
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 font-bold">
-                SPATIAL v8.5
+                PRO v9.0
               </span>
             </div>
 
+            {/* کارت پروفایل پویا گودرزی با سایز دقیق و قفل‌شده 42x42 پیکسل */}
             <button
               onClick={() => setWorkspace("ARCHITECT")}
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 transition-all text-xs text-slate-100"
+              className="btn-cyber flex items-center gap-2.5 px-3 py-1.5 rounded-2xl text-xs"
             >
-              <div className="w-8 h-8 rounded-xl overflow-hidden border border-emerald-400/60 bg-gradient-to-br from-emerald-500/30 to-cyan-500/30 shrink-0 flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.35)]">
+              <div
+                style={{ width: 42, height: 42, minWidth: 42, maxWidth: 42 }}
+                className="relative rounded-xl overflow-hidden border-2 border-emerald-400/80 bg-slate-900 shrink-0 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.45)]"
+              >
                 <SmartAssetImage
                   baseName="pooya-fintech"
                   alt="Pooya Goodarzi"
+                  className="w-full h-full object-cover object-top"
+                  style={{
+                    width: "42px",
+                    height: "42px",
+                    objectFit: "cover",
+                    objectPosition: "top center",
+                  }}
                   fallback={
-                    <span className="font-mono font-black text-[11px] text-emerald-300">
+                    <span className="font-mono font-black text-xs text-emerald-300">
                       PG
                     </span>
                   }
                 />
               </div>
               <div className="text-start">
-                <div className="font-bold text-white leading-tight">
-                  {lang === "fa" ? "پویا گودرزی" : "Pooya Goodarzi"}
+                <div className="font-bold text-white leading-tight flex items-center gap-1.5">
+                  <span>{lang === "fa" ? "پویا گودرزی" : "Pooya Goodarzi"}</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
                 </div>
                 <div className="text-[10px] text-cyan-300 font-mono">
                   {lang === "fa"
                     ? "معمار سیستم و طراح UI/UX"
-                    : "System & UI/UX Architect"}
+                    : "Lead System Architect"}
                 </div>
               </div>
             </button>
@@ -188,16 +207,14 @@ export default function TopNav() {
 
           {/* انتخابگر تم رنگی + کنترل‌های سیستم */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-[#020408] border border-white/10 text-[11px] font-mono">
-              <Palette className="w-3.5 h-3.5 text-slate-400 mx-1" />
+            <div className="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-[#020408] border border-cyan-500/25 text-[11px] font-mono">
+              <Palette className="w-3.5 h-3.5 text-cyan-400 mx-1" />
               {THEMES.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setTheme(t.id)}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all ${
-                    theme === t.id
-                      ? "bg-white/15 text-white font-bold"
-                      : "text-slate-400 hover:text-white"
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all ${
+                    theme === t.id ? "btn-cyber-active" : "btn-cyber"
                   }`}
                 >
                   <span className={`w-2 h-2 rounded-full ${t.dot}`} />
@@ -208,23 +225,21 @@ export default function TopNav() {
 
             <button
               onClick={() => setCommandOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs text-slate-200 transition-all"
+              className="btn-cyber flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
             >
               <Command className="w-3.5 h-3.5 text-cyan-400" />
               <span className="hidden sm:inline">
                 {lang === "fa" ? "پالت فرمان" : "Command"}
               </span>
-              <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-slate-900 text-cyan-300 rounded border border-white/10">
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-slate-950 text-cyan-300 rounded border border-cyan-500/30">
                 Ctrl+K
               </kbd>
             </button>
 
             <button
               onClick={toggleLiveStream}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono border transition-all ${
-                isLiveStreamActive
-                  ? "bg-emerald-500/20 border-emerald-400/50 text-emerald-200"
-                  : "bg-amber-500/20 border-amber-400/50 text-amber-200"
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
+                isLiveStreamActive ? "btn-cyber-active" : "btn-cyber-danger"
               }`}
             >
               {isLiveStreamActive ? (
@@ -242,7 +257,7 @@ export default function TopNav() {
 
             <button
               onClick={toggleLang}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-100 text-xs font-mono font-bold transition-all"
+              className="btn-cyber-purple flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-mono font-bold"
             >
               <Globe className="w-3.5 h-3.5 text-cyan-300" />
               <span>{lang === "fa" ? "EN" : "FA"}</span>
@@ -251,10 +266,10 @@ export default function TopNav() {
         </div>
       </header>
 
-      {/* داشبورد فرماندهی فضایی (Spatial Command Deck) */}
+      {/* داشبورد فرماندهی فضایی */}
       <div className="max-w-[1720px] mx-auto px-3 lg:px-8 pt-4 space-y-3">
         {/* نوار سوییچ ۴ محیط کاری */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-1.5 rounded-2xl bg-[#040711]/90 border border-white/15">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-1.5 rounded-2xl bg-[#040711]/95 border border-white/15">
           {WORKSPACES.map((ws) => {
             const Icon = ws.icon;
             const active = workspace === ws.id;
@@ -263,9 +278,7 @@ export default function TopNav() {
                 key={ws.id}
                 onClick={() => setWorkspace(ws.id)}
                 className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${
-                  active
-                    ? "bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.4)]"
-                    : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  active ? "btn-cyber-active" : "btn-cyber"
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -277,10 +290,10 @@ export default function TopNav() {
           })}
         </div>
 
-        {/* کارت هولوگرافیک آمار پرتفوی (بدون حلقه گیج‌کننده قبلی) */}
-        <div className="cyber-card rounded-2xl border border-white/15 p-3.5 lg:p-4 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 flex-1">
-            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-emerald-500/25">
+        {/* کارت هولوگرافیک آمار پرتفوی با واترمارک محو هولوگرام در پس‌زمینه */}
+        <div className="cyber-card relative overflow-hidden rounded-2xl border border-white/15 p-3.5 lg:p-4 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 flex-1 relative z-10">
+            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-emerald-500/30">
               <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
                 <Wallet className="w-3.5 h-3.5 text-emerald-400" />
                 <span>
@@ -299,7 +312,7 @@ export default function TopNav() {
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-cyan-500/25">
+            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-cyan-500/30">
               <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
                 <span>
@@ -323,7 +336,7 @@ export default function TopNav() {
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-white/10">
+            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-white/15">
               <div className="text-[11px] text-slate-400">
                 {lang === "fa" ? "قدرت خرید نقد (USD)" : "Available Margin"}
               </div>
@@ -339,8 +352,7 @@ export default function TopNav() {
               </div>
             </div>
 
-            {/* کارت چهارم: اکولایزر عصبی هوش مصنوعی (جایگزین آن دایره نیمه‌پر قبلی) */}
-            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-purple-500/25 flex flex-col justify-between">
+            <div className="p-3 rounded-xl bg-[#03060C]/90 border border-purple-500/30 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] text-slate-400">
                   {lang === "fa" ? "موتور سیگنال AI" : "AI Neural Confidence"}
@@ -369,14 +381,12 @@ export default function TopNav() {
             </div>
           </div>
 
-          {/* شبیه‌سازهای تعاملی بازار */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 xl:pt-0 border-t xl:border-t-0 border-white/10">
+          {/* شبیه‌سازهای تعاملی بازار با دکمه‌های نئونی مدرن */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 xl:pt-0 border-t xl:border-t-0 border-white/10 relative z-10">
             <button
               onClick={toggleAutoBot}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-bold border transition-all ${
-                isAutoBotActive
-                  ? "bg-emerald-400 text-slate-950 border-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.6)]"
-                  : "bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border-emerald-400/40"
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-bold transition-all ${
+                isAutoBotActive ? "btn-cyber-active" : "btn-cyber-purple"
               }`}
             >
               <Bot className="w-4 h-4" />
@@ -393,9 +403,9 @@ export default function TopNav() {
 
             <button
               onClick={() => triggerMarketShock("PUMP")}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/40 text-cyan-200 font-mono text-xs font-bold transition-all"
+              className="btn-cyber flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl font-mono text-xs font-bold"
             >
-              <Flame className="w-4 h-4 text-cyan-400" />
+              <Flame className="w-4 h-4 text-emerald-400" />
               <span>
                 {lang === "fa" ? "موج خرید نهنگ‌ها (+Pump)" : "Whale Bull Pump"}
               </span>
@@ -403,9 +413,9 @@ export default function TopNav() {
 
             <button
               onClick={() => triggerMarketShock("CRASH")}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-200 font-mono text-xs font-bold transition-all"
+              className="btn-cyber-danger flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl font-mono text-xs font-bold"
             >
-              <Zap className="w-4 h-4 text-rose-400" />
+              <Zap className="w-4 h-4 text-rose-300" />
               <span>
                 {lang === "fa" ? "شوک ریزشی (-Crash)" : "Flash Crash"}
               </span>

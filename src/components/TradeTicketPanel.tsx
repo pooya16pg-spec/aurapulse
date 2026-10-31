@@ -99,7 +99,7 @@ export default function TradeTicketPanel() {
           {selectedOrderBookPrice && (
             <button
               onClick={() => setSelectedOrderBookPrice(null)}
-              className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/30"
+              className="btn-cyber text-[10px] font-mono px-2 py-0.5 rounded text-cyan-300"
             >
               Limit: ${selectedOrderBookPrice} ✕
             </button>
@@ -111,9 +111,7 @@ export default function TradeTicketPanel() {
             type="button"
             onClick={() => setSide("BUY")}
             className={`py-2 rounded-lg font-bold transition-all ${
-              side === "BUY"
-                ? "bg-emerald-500 text-slate-950 shadow-lg"
-                : "text-slate-400 hover:text-white"
+              side === "BUY" ? "btn-cyber-active" : "btn-cyber"
             }`}
           >
             {lang === "fa" ? "خرید تعهدی (LONG)" : "LONG / BUY"}
@@ -122,9 +120,7 @@ export default function TradeTicketPanel() {
             type="button"
             onClick={() => setSide("SELL")}
             className={`py-2 rounded-lg font-bold transition-all ${
-              side === "SELL"
-                ? "bg-rose-500 text-white shadow-lg"
-                : "text-slate-400 hover:text-white"
+              side === "SELL" ? "btn-cyber-danger" : "btn-cyber"
             }`}
           >
             {lang === "fa" ? "فروش تعهدی (SHORT)" : "SHORT / SELL"}
@@ -147,10 +143,8 @@ export default function TradeTicketPanel() {
                 key={lev}
                 type="button"
                 onClick={() => setLeverage(lev)}
-                className={`py-1 rounded-lg border transition-all ${
-                  leverage === lev
-                    ? "bg-cyan-500/20 border-cyan-400 text-cyan-200 font-bold"
-                    : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
+                className={`py-1.5 rounded-lg transition-all ${
+                  leverage === lev ? "btn-cyber-active" : "btn-cyber"
                 }`}
               >
                 {lev}x
@@ -181,9 +175,9 @@ export default function TradeTicketPanel() {
                 step="any"
                 value={usdInput}
                 onChange={(e) => setUsdInput(e.target.value)}
-                className="w-full rounded-xl bg-[#020408] border border-white/15 focus:border-emerald-400 px-3.5 py-2 font-mono text-sm text-white focus:outline-none"
+                className="w-full rounded-xl bg-[#020408] border border-cyan-500/30 focus:border-emerald-400 px-3.5 py-2 font-mono text-sm text-white focus:outline-none"
               />
-              <span className="absolute left-3 font-mono text-xs text-slate-400">
+              <span className="absolute left-3 font-mono text-xs text-cyan-400">
                 USD
               </span>
             </div>
@@ -195,14 +189,14 @@ export default function TradeTicketPanel() {
                 key={pct}
                 type="button"
                 onClick={() => handlePercentage(pct)}
-                className="py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition-colors"
+                className="btn-cyber py-1.5 rounded-lg font-bold"
               >
                 {pct}%
               </button>
             ))}
           </div>
 
-          <div className="p-2.5 rounded-xl bg-[#020408]/90 border border-white/5 space-y-1 text-[11px] font-mono">
+          <div className="p-2.5 rounded-xl bg-[#020408]/90 border border-white/10 space-y-1 text-[11px] font-mono">
             <div className="flex justify-between text-slate-400">
               <span>{lang === "fa" ? "حجم کل پوزیشن:" : "Position Size:"}</span>
               <span className="text-white font-semibold">
@@ -228,10 +222,8 @@ export default function TradeTicketPanel() {
 
           <button
             type="submit"
-            className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg ${
-              side === "BUY"
-                ? "bg-emerald-400 hover:bg-emerald-300 text-slate-950"
-                : "bg-rose-500 hover:bg-rose-400 text-white"
+            className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${
+              side === "BUY" ? "btn-cyber-active" : "btn-cyber-danger"
             }`}
           >
             {lang === "fa"
@@ -258,24 +250,31 @@ export default function TradeTicketPanel() {
         )}
       </div>
 
-      {/* رادار چندعاملی هوش مصنوعی کوانتومی با پشتیبانی هوشمند از عکس quant-core */}
-      <div className="cyber-card rounded-2xl border border-white/15 p-4 space-y-3">
-        <div className="relative h-28 w-full rounded-xl overflow-hidden bg-gradient-to-br from-emerald-500/20 via-[#040814] to-cyan-500/25 border border-white/15 flex items-center justify-center">
+      {/* رادار هوش مصنوعی با ادغام هولوگرافیک عکس دوم در بافت تاریک سایت */}
+      <div className="cyber-card rounded-2xl border border-white/15 p-4 space-y-3 relative overflow-hidden">
+        <div
+          className="hologram-banner"
+          style={{ height: "145px", maxHeight: "145px" }}
+        >
           <SmartAssetImage
             baseName="quant-core"
             alt="AI Quant Risk Engine"
-            className="w-full h-full object-cover opacity-90"
+            className="hologram-img-blend"
+            style={{
+              width: "100%",
+              height: "145px",
+              objectFit: "cover",
+              objectPosition: "center",
+            }}
             fallback={
-              <div className="w-full h-full flex items-center justify-center relative">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-cyan-400/50 animate-pulse flex items-center justify-center">
-                  <Cpu className="w-8 h-8 text-cyan-300" />
-                </div>
+              <div className="w-full h-full flex items-center justify-center">
+                <Cpu className="w-10 h-10 text-cyan-400 animate-pulse" />
               </div>
             }
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#020408] via-[#020408]/30 to-transparent" />
-          <div className="absolute bottom-2 right-3 left-3 flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-xs font-bold text-white">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#040711] via-transparent to-[#040711]/60 pointer-events-none" />
+          <div className="absolute bottom-2.5 right-3 left-3 flex items-center justify-between z-10">
+            <span className="flex items-center gap-1.5 text-xs font-bold text-white drop-shadow">
               <Cpu className="w-4 h-4 text-cyan-400" />
               {lang === "fa"
                 ? "رادار هوش مصنوعی کوانتومی"
@@ -292,13 +291,13 @@ export default function TradeTicketPanel() {
             <span>
               {lang === "fa" ? "جریان سفارشات نهنگ‌ها:" : "Whale Order Flow:"}
             </span>
-            <span className="font-mono text-emerald-400">
+            <span className="font-mono text-emerald-400 font-bold">
               {activeAsset.whaleScore}% Bullish
             </span>
           </div>
           <div className="w-full h-1.5 rounded-full bg-[#020408] overflow-hidden">
             <div
-              className="h-full bg-emerald-400 transition-all duration-500"
+              className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-500"
               style={{ width: `${activeAsset.whaleScore}%` }}
             />
           </div>
@@ -307,13 +306,13 @@ export default function TradeTicketPanel() {
             <span>
               {lang === "fa" ? "شاخص نوسان و ریسک:" : "Volatility Risk:"}
             </span>
-            <span className="font-mono text-cyan-400">
+            <span className="font-mono text-cyan-400 font-bold">
               {activeAsset.volatilityRisk} / 100
             </span>
           </div>
           <div className="w-full h-1.5 rounded-full bg-[#020408] overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-500"
+              className="h-full bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-500"
               style={{ width: `${activeAsset.volatilityRisk}%` }}
             />
           </div>

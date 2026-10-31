@@ -13,7 +13,6 @@ import {
   Cpu,
   ExternalLink,
   Flame,
-  ShieldCheck,
   Terminal,
 } from "lucide-react";
 
@@ -215,7 +214,7 @@ export default function AuraPulseTerminalPage() {
               <div className="flex flex-wrap gap-2 pt-2">
                 <button
                   onClick={() => triggerMarketShock("PUMP")}
-                  className="px-4 py-2.5 rounded-xl bg-emerald-400 text-slate-950 font-mono text-xs font-bold"
+                  className="btn-cyber-active px-4 py-2.5 rounded-xl font-mono text-xs font-bold"
                 >
                   {lang === "fa"
                     ? "اجرای تست استرس صعودی روی مدل AI"
@@ -223,7 +222,7 @@ export default function AuraPulseTerminalPage() {
                 </button>
                 <button
                   onClick={() => setWorkspace("TERMINAL")}
-                  className="px-4 py-2.5 rounded-xl bg-white/10 text-white font-mono text-xs font-bold"
+                  className="btn-cyber px-4 py-2.5 rounded-xl font-mono text-xs font-bold"
                 >
                   {lang === "fa"
                     ? "بازگشت به چارت زنده"
@@ -260,7 +259,6 @@ export default function AuraPulseTerminalPage() {
           </div>
         )}
 
-        {/* محیط کاری ۴: شناسنامه معماری مهندسی پویا گودرزی با قاب عکس بزرگ */}
         {workspace === "ARCHITECT" && (
           <div
             dir={lang === "fa" ? "rtl" : "ltr"}
@@ -268,10 +266,25 @@ export default function AuraPulseTerminalPage() {
           >
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-white/10 pb-6">
               <div className="flex flex-col sm:flex-row items-center gap-5">
-                <div className="w-28 h-28 rounded-2xl overflow-hidden border-2 border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)] bg-slate-900 shrink-0 flex items-center justify-center">
+                <div
+                  style={{
+                    width: 112,
+                    height: 112,
+                    minWidth: 112,
+                    maxWidth: 112,
+                  }}
+                  className="rounded-2xl overflow-hidden border-2 border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.45)] bg-slate-900 shrink-0 flex items-center justify-center"
+                >
                   <SmartAssetImage
                     baseName="pooya-fintech"
                     alt="Pooya Goodarzi"
+                    className="w-full h-full object-cover object-top"
+                    style={{
+                      width: "112px",
+                      height: "112px",
+                      objectFit: "cover",
+                      objectPosition: "top center",
+                    }}
                     fallback={
                       <span className="font-mono font-black text-3xl text-emerald-400">
                         PG
@@ -300,7 +313,7 @@ export default function AuraPulseTerminalPage() {
                 href="https://pooya16pg-spec.github.io/pooya-os/"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-bold text-xs shrink-0 shadow-lg"
+                className="btn-cyber-active flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs shrink-0"
               >
                 <span>
                   {lang === "fa"

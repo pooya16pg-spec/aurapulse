@@ -6,6 +6,7 @@ interface SmartAssetImageProps {
   baseName: "pooya-fintech" | "quant-core";
   alt: string;
   className?: string;
+  style?: React.CSSProperties;
   fallback: React.ReactNode;
 }
 
@@ -22,6 +23,7 @@ export default function SmartAssetImage({
   baseName,
   alt,
   className = "w-full h-full object-cover",
+  style,
   fallback,
 }: SmartAssetImageProps) {
   const paths = CANDIDATE_PATHS(baseName);
@@ -37,6 +39,7 @@ export default function SmartAssetImage({
       src={paths[idx]}
       alt={alt}
       className={className}
+      style={style}
       onError={() => {
         if (idx + 1 < paths.length) {
           setIdx(idx + 1);

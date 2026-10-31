@@ -33,8 +33,7 @@ export default function PortfolioPositions() {
       dir={lang === "fa" ? "rtl" : "ltr"}
       className="grid grid-cols-1 lg:grid-cols-12 gap-5"
     >
-      {/* جدول پوزیشن‌های باز + دکمه تسویه آنی و برداشت سود */}
-      <div className="lg:col-span-8 glass-card rounded-2xl border border-white/15 p-4 md:p-5 space-y-4">
+      <div className="lg:col-span-8 cyber-card rounded-2xl border border-white/15 p-4 md:p-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-cyan-400" />
@@ -133,9 +132,9 @@ export default function PortfolioPositions() {
                             e.stopPropagation();
                             closePosition(sym);
                           }}
-                          className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 transition-all text-[11px] font-sans font-bold"
+                          className="btn-cyber-danger px-3 py-1 rounded-lg text-[11px] font-sans font-bold"
                         >
-                          {lang === "fa" ? "تسویه آنی" : "Close / TP"}
+                          {lang === "fa" ? "تسویه آنی (TP)" : "Close / TP"}
                         </button>
                       ) : (
                         <span className="text-[11px] text-slate-500 inline-flex items-center gap-1">
@@ -152,8 +151,7 @@ export default function PortfolioPositions() {
         </div>
       </div>
 
-      {/* لاگ تراکنش‌ها */}
-      <div className="lg:col-span-4 glass-card rounded-2xl border border-white/15 p-4 md:p-5 space-y-4">
+      <div className="lg:col-span-4 cyber-card rounded-2xl border border-white/15 p-4 md:p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-white/10 pb-3">
           <div className="flex items-center gap-2">
             <History className="w-4 h-4 text-emerald-400" />
