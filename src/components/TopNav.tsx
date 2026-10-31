@@ -19,6 +19,7 @@ export default function TopNav() {
     assets,
     holdings,
     isLiveStreamActive,
+    isBinanceConnected,
     toggleLang,
     toggleLiveStream,
     setCommandOpen,
@@ -49,8 +50,8 @@ export default function TopNav() {
             <span className="font-mono font-bold tracking-wider text-white text-sm">
               AuraPulse
             </span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-400/20 text-emerald-300">
-              QUANT v2.4
+            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${isBinanceConnected ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30" : "bg-amber-400/10 text-amber-200 border-amber-400/30"}`}>
+              {isBinanceConnected ? "BINANCE LIVE" : "SIMULATED"}
             </span>
           </div>
 
