@@ -64,6 +64,8 @@ export interface TradeOrder {
   executionPrice: number;
   timestamp: string;
   tag?: string;
+  feeUSD?: number;
+  realizedPnlUSD?: number;
 }
 
 interface AuraState {
@@ -85,6 +87,8 @@ interface AuraState {
   lastNotification: string | null;
   aiLogs: string[];
   balanceUSD: number;
+  realizedPnlUSD: number;
+  isAccountHydrated: boolean;
   assets: Record<AssetSymbol, AssetInfo>;
   holdings: Record<AssetSymbol, number>;
   avgEntryPrices: Record<AssetSymbol, number>;
@@ -274,7 +278,10 @@ const INITIAL_ASSETS: Record<AssetSymbol, AssetInfo> = {
   ),
 };
 
+const PAPER_ACCOUNT_STORAGE_KEY = "aurapulse:paper-account:v1";
+const PAPER_FEE_RATE = 0.001; // 0.10% illustrative simulator fee, not an exchange fee quote.
 let tickCounter = 0;
+let hasHydratedPaperAccount = false;
 
 let globalState: AuraState = {
   lang: "fa",
@@ -300,6 +307,8 @@ let globalState: AuraState = {
     "[PAPER] Orders are local browser calculations; no exchange orders are sent.",
   ],
   balanceUSD: 128500.0,
+  realizedPnlUSD: 0,
+  isAccountHydrated: false,
   assets: INITIAL_ASSETS,
   holdings: {
     "BTC/USD": 0.85,
@@ -343,6 +352,137 @@ function setState(updater: (prev: AuraState) => Partial<AuraState>) {
   globalState = { ...globalState, ...updater(globalState) };
   listeners.forEach((listener) => listener());
 }
+
+function persistPaperAccount(state: AuraState = globalState) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      PAPER_ACCOUNT_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        balanceUSD: state.balanceUSD,
+        realizedPnlUSD: state.realizedPnlUSD,
+        holdings: state.holdings,
+        avgEntryPrices: state.avgEntryPrices,
+        orders: state.orders.slice(0, 100),
+        savedAt: new Date().toISOString(),
+      })
+    );
+  } catch {
+    // Private browsing or disabled storage should not interrupt paper trading.
+  }
+}
+
+const hydratePaperAccount = () => {
+  if (hasHydratedPaperAccount || typeof window === "undefined") return;
+  hasHydratedPaperAccount = true;
+  try {
+    const raw = window.localStorage.getItem(PAPER_ACCOUNT_STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw) as {
+        version?: number;
+        balanceUSD?: number;
+        realizedPnlUSD?: number;
+        holdings?: Partial<Record<AssetSymbol, number>>;
+        avgEntryPrices?: Partial<Record<AssetSymbol, number>>;
+        orders?: TradeOrder[];
+      };
+      if (
+        saved.version === 1 &&
+        typeof saved.balanceUSD === "number" &&
+        Number.isFinite(saved.balanceUSD) &&
+        saved.balanceUSD >= 0
+      ) {
+        const symbols: AssetSymbol[] = ["BTC/USD", "ETH/USD", "NVDA/AI", "SOL/USD"];
+        const holdings = { ...globalState.holdings };
+        const avgEntryPrices = { ...globalState.avgEntryPrices };
+        symbols.forEach((symbol) => {
+          const quantity = saved.holdings?.[symbol];
+          const entry = saved.avgEntryPrices?.[symbol];
+          if (typeof quantity === "number" && Number.isFinite(quantity) && quantity >= 0) {
+            holdings[symbol] = quantity;
+          }
+          if (typeof entry === "number" && Number.isFinite(entry) && entry >= 0) {
+            avgEntryPrices[symbol] = entry;
+          }
+        });
+        const orders = Array.isArray(saved.orders)
+          ? saved.orders.filter(
+              (order) =>
+                order &&
+                typeof order.id === "string" &&
+                symbols.includes(order.symbol) &&
+                (order.side === "BUY" || order.side === "SELL") &&
+                Number.isFinite(order.amount) &&
+                Number.isFinite(order.executionPrice)
+            ).slice(0, 100)
+          : globalState.orders;
+        setState(() => ({
+          balanceUSD: saved.balanceUSD as number,
+          realizedPnlUSD:
+            typeof saved.realizedPnlUSD === "number" && Number.isFinite(saved.realizedPnlUSD)
+              ? saved.realizedPnlUSD
+              : 0,
+          holdings,
+          avgEntryPrices,
+          orders,
+          isAccountHydrated: true,
+        }));
+        return;
+      }
+    }
+  } catch {
+    // Ignore malformed or unavailable local account data and keep the seeded demo account.
+  }
+  setState(() => ({ isAccountHydrated: true }));
+};
+
+const resetPaperAccount = () => {
+  setState(() => ({
+    balanceUSD: 128500,
+    realizedPnlUSD: 0,
+    holdings: {
+      "BTC/USD": 0.85,
+      "ETH/USD": 8.5,
+      "NVDA/AI": 120,
+      "SOL/USD": 45,
+    },
+    avgEntryPrices: {
+      "BTC/USD": 91450,
+      "ETH/USD": 3290,
+      "NVDA/AI": 141.2,
+      "SOL/USD": 212.5,
+    },
+    orders: [
+      {
+        id: "ORD-9041",
+        symbol: "BTC/USD",
+        side: "BUY",
+        amount: 0.25,
+        leverage: 5,
+        executionPrice: 93420,
+        timestamp: "14:22:10",
+        tag: "SEEDED-DEMO",
+      },
+      {
+        id: "ORD-9040",
+        symbol: "NVDA/AI",
+        side: "BUY",
+        amount: 50,
+        leverage: 2,
+        executionPrice: 145.8,
+        timestamp: "13:50:44",
+        tag: "SEEDED-DEMO",
+      },
+    ],
+    isAutoBotActive: false,
+    lastNotification:
+      globalState.lang === "fa"
+        ? "حساب آزمایشی به مقادیر اولیه بازنشانی شد."
+        : "Paper account reset to its starter values.",
+  }));
+  persistPaperAccount(globalState);
+};
 
 const toggleLang = () =>
   setState((state) => ({ lang: state.lang === "fa" ? "en" : "fa" }));
@@ -534,6 +674,7 @@ const triggerMarketShock = (direction: "PUMP" | "CRASH") => {
 const tickMarket = () => {
   if (!globalState.isLiveStreamActive) return;
   tickCounter++;
+  let botTradePlaced = false;
   setState((state) => {
     const updatedAssets = { ...state.assets };
     const tf = state.timeframe;
@@ -613,6 +754,7 @@ const tickMarket = () => {
 
     let nextOrders = state.orders;
     let nextHoldings = state.holdings;
+    let nextAvgEntryPrices = state.avgEntryPrices;
     let nextBalance = state.balanceUSD;
     let nextLogs = state.aiLogs;
 
@@ -620,7 +762,13 @@ const tickMarket = () => {
       const activeSym = state.selectedSymbol;
       const activePrice = updatedAssets[activeSym].price;
       const tradeUSD = 400;
-      const units = Number((tradeUSD / activePrice).toFixed(4));
+      const units = Number((tradeUSD / activePrice).toFixed(6));
+      const feeUSD = Number((tradeUSD * PAPER_FEE_RATE).toFixed(2));
+      const previousUnits = state.holdings[activeSym];
+      const nextUnits = Number((previousUnits + units).toFixed(6));
+      const nextAverage = nextUnits > 0
+        ? Number(((previousUnits * state.avgEntryPrices[activeSym] + units * activePrice + feeUSD) / nextUnits).toFixed(4))
+        : activePrice;
       const botOrder: TradeOrder = {
         id: `BOT-${Math.floor(1000 + Math.random() * 9000)}`,
         symbol: activeSym,
@@ -630,13 +778,19 @@ const tickMarket = () => {
         executionPrice: activePrice,
         timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
         tag: "DEMO-BOT",
+        feeUSD,
       };
-      nextBalance = Number((state.balanceUSD - tradeUSD).toFixed(2));
+      nextBalance = Number((state.balanceUSD - tradeUSD - feeUSD).toFixed(2));
       nextHoldings = {
         ...state.holdings,
-        [activeSym]: Number((state.holdings[activeSym] + units).toFixed(4)),
+        [activeSym]: nextUnits,
       };
-      nextOrders = [botOrder, ...state.orders.slice(0, 14)];
+      nextAvgEntryPrices = {
+        ...state.avgEntryPrices,
+        [activeSym]: nextAverage,
+      };
+      botTradePlaced = true;
+      nextOrders = [botOrder, ...state.orders.slice(0, 99)];
       nextLogs = [
         `[${nowStr}] DEMO-BOT :: Simulated 1x spot BUY on ${activeSym} (${units} units @ ${activePrice})`,
         ...state.aiLogs.slice(0, 12),
@@ -648,11 +802,12 @@ const tickMarket = () => {
       balanceUSD: nextBalance,
       holdings: nextHoldings,
       orders: nextOrders,
+      avgEntryPrices: nextAvgEntryPrices,
       aiLogs: nextLogs,
     };
   });
+  if (botTradePlaced) persistPaperAccount(globalState);
 };
-
 const executeOrder = (
   side: "BUY" | "SELL",
   usdAmount: number,
@@ -660,105 +815,145 @@ const executeOrder = (
 ): boolean => {
   const sym = globalState.selectedSymbol;
   const activeAsset = globalState.assets[sym];
-  if (usdAmount <= 0) return false;
-
   const execPrice = globalState.selectedOrderBookPrice || activeAsset.price;
-  const units = Number(((usdAmount * leverage) / execPrice).toFixed(4));
+  if (
+    !Number.isFinite(usdAmount) ||
+    usdAmount <= 0 ||
+    !Number.isFinite(execPrice) ||
+    execPrice <= 0 ||
+    !Number.isFinite(leverage) ||
+    leverage < 1 ||
+    leverage > 5
+  ) return false;
+
   const nowStr = new Date().toLocaleTimeString("en-US", { hour12: false });
 
   if (side === "BUY") {
-    if (globalState.balanceUSD < usdAmount) return false;
+    const notionalUSD = usdAmount * leverage;
+    const feeUSD = Number((notionalUSD * PAPER_FEE_RATE).toFixed(2));
+    const totalDebit = Number((usdAmount + feeUSD).toFixed(2));
+    if (globalState.balanceUSD < totalDebit) return false;
+
+    const units = Number((notionalUSD / execPrice).toFixed(6));
     const prevQty = globalState.holdings[sym];
     const prevAvg = globalState.avgEntryPrices[sym];
-    const newQty = Number((prevQty + units).toFixed(4));
+    const newQty = Number((prevQty + units).toFixed(6));
     const newAvg =
       newQty > 0
-        ? Number(((prevQty * prevAvg + units * execPrice) / newQty).toFixed(2))
+        ? Number(((prevQty * prevAvg + units * execPrice + feeUSD) / newQty).toFixed(4))
         : execPrice;
 
     const newOrder: TradeOrder = {
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: `ORD-${Date.now()}`,
       symbol: sym,
       side: "BUY",
       amount: units,
       leverage,
       executionPrice: execPrice,
       timestamp: nowStr,
-      tag: "MANUAL",
+      tag: "MANUAL-PAPER",
+      feeUSD,
     };
 
     setState((state) => ({
-      balanceUSD: Number((state.balanceUSD - usdAmount).toFixed(2)),
+      balanceUSD: Number((state.balanceUSD - totalDebit).toFixed(2)),
       holdings: { ...state.holdings, [sym]: newQty },
       avgEntryPrices: { ...state.avgEntryPrices, [sym]: newAvg },
-      orders: [newOrder, ...state.orders.slice(0, 14)],
+      orders: [newOrder, ...state.orders.slice(0, 99)],
       aiLogs: [
-        `[${nowStr}] ORDER-FILL :: BUY ${units} ${sym} (${leverage}x) filled @ $${execPrice}`,
+        `[${nowStr}] PAPER-FILL :: BUY ${units} ${sym} @ $${execPrice} • fee $${feeUSD.toFixed(2)}`,
         ...state.aiLogs.slice(0, 12),
       ],
+      lastNotification:
+        state.lang === "fa"
+          ? `سفارش آزمایشی خرید ثبت شد؛ کارمزد شبیه‌سازی‌شده $${feeUSD.toFixed(2)}`
+          : `Paper BUY filled; simulated fee $${feeUSD.toFixed(2)}`,
     }));
-    return true;
-  } else {
-    const currentUnits = globalState.holdings[sym];
-    const sellUnits = Number((usdAmount / execPrice).toFixed(4));
-    if (currentUnits <= 0) return false;
-    const actualSell = Math.min(currentUnits, sellUnits);
-    const realizedUSD = Number((actualSell * execPrice).toFixed(2));
-
-    const newOrder: TradeOrder = {
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      symbol: sym,
-      side: "SELL",
-      amount: Number(actualSell.toFixed(4)),
-      leverage,
-      executionPrice: execPrice,
-      timestamp: nowStr,
-      tag: "MANUAL",
-    };
-
-    setState((state) => ({
-      balanceUSD: Number((state.balanceUSD + realizedUSD).toFixed(2)),
-      holdings: {
-        ...state.holdings,
-        [sym]: Number(Math.max(0, currentUnits - actualSell).toFixed(4)),
-      },
-      orders: [newOrder, ...state.orders.slice(0, 14)],
-      aiLogs: [
-        `[${nowStr}] ORDER-FILL :: SELL ${actualSell.toFixed(4)} ${sym} filled @ $${execPrice}`,
-        ...state.aiLogs.slice(0, 12),
-      ],
-    }));
+    persistPaperAccount(globalState);
     return true;
   }
+
+  const currentUnits = globalState.holdings[sym];
+  if (currentUnits <= 0) return false;
+  const requestedUnits = usdAmount / execPrice;
+  const actualSell = Math.min(currentUnits, requestedUnits);
+  const grossProceeds = Number((actualSell * execPrice).toFixed(2));
+  const feeUSD = Number((grossProceeds * PAPER_FEE_RATE).toFixed(2));
+  const netProceeds = Number((grossProceeds - feeUSD).toFixed(2));
+  const entryPrice = globalState.avgEntryPrices[sym];
+  const realizedPnlUSD = Number(((execPrice - entryPrice) * actualSell - feeUSD).toFixed(2));
+  const remainingUnits = Number(Math.max(0, currentUnits - actualSell).toFixed(6));
+
+  const newOrder: TradeOrder = {
+    id: `ORD-${Date.now()}`,
+    symbol: sym,
+    side: "SELL",
+    amount: Number(actualSell.toFixed(6)),
+    leverage: 1,
+    executionPrice: execPrice,
+    timestamp: nowStr,
+    tag: "MANUAL-PAPER",
+    feeUSD,
+    realizedPnlUSD,
+  };
+
+  setState((state) => ({
+    balanceUSD: Number((state.balanceUSD + netProceeds).toFixed(2)),
+    holdings: { ...state.holdings, [sym]: remainingUnits },
+    avgEntryPrices: {
+      ...state.avgEntryPrices,
+      [sym]: remainingUnits === 0 ? 0 : state.avgEntryPrices[sym],
+    },
+    realizedPnlUSD: Number((state.realizedPnlUSD + realizedPnlUSD).toFixed(2)),
+    orders: [newOrder, ...state.orders.slice(0, 99)],
+    aiLogs: [
+      `[${nowStr}] PAPER-FILL :: SELL ${actualSell} ${sym} @ $${execPrice} • net P&L $${realizedPnlUSD.toFixed(2)}`,
+      ...state.aiLogs.slice(0, 12),
+    ],
+    lastNotification:
+      state.lang === "fa"
+        ? `سفارش آزمایشی فروش ثبت شد؛ سود/زیان تحقق‌یافته $${realizedPnlUSD.toFixed(2)}`
+        : `Paper SELL filled; realized P&L $${realizedPnlUSD.toFixed(2)}`,
+  }));
+  persistPaperAccount(globalState);
+  return true;
 };
 
 const closePosition = (sym: AssetSymbol) => {
   const qty = globalState.holdings[sym];
   if (qty <= 0) return;
   const price = globalState.assets[sym].price;
-  const usdValue = Number((qty * price).toFixed(2));
+  const grossProceeds = Number((qty * price).toFixed(2));
+  const feeUSD = Number((grossProceeds * PAPER_FEE_RATE).toFixed(2));
+  const netProceeds = Number((grossProceeds - feeUSD).toFixed(2));
+  const realizedPnlUSD = Number(((price - globalState.avgEntryPrices[sym]) * qty - feeUSD).toFixed(2));
   const nowStr = new Date().toLocaleTimeString("en-US", { hour12: false });
 
-  const closeOrd: TradeOrder = {
-    id: `CLS-${Math.floor(1000 + Math.random() * 9000)}`,
+  const closeOrder: TradeOrder = {
+    id: `CLS-${Date.now()}`,
     symbol: sym,
     side: "SELL",
     amount: qty,
     leverage: 1,
     executionPrice: price,
     timestamp: nowStr,
-    tag: "TAKE-PROFIT",
+    tag: "CLOSE-PAPER",
+    feeUSD,
+    realizedPnlUSD,
   };
 
   setState((state) => ({
-    balanceUSD: Number((state.balanceUSD + usdValue).toFixed(2)),
+    balanceUSD: Number((state.balanceUSD + netProceeds).toFixed(2)),
     holdings: { ...state.holdings, [sym]: 0 },
-    orders: [closeOrd, ...state.orders.slice(0, 14)],
+    avgEntryPrices: { ...state.avgEntryPrices, [sym]: 0 },
+    realizedPnlUSD: Number((state.realizedPnlUSD + realizedPnlUSD).toFixed(2)),
+    orders: [closeOrder, ...state.orders.slice(0, 99)],
     lastNotification:
       state.lang === "fa"
-        ? `✅ پوزیشن ${sym} به ارزش $${usdValue.toLocaleString("en-US")} تسویه شد!`
-        : `✅ Closed ${sym} position for $${usdValue.toLocaleString("en-US")}!`,
+        ? `پوزیشن ${sym} بسته شد؛ سود/زیان خالص $${realizedPnlUSD.toFixed(2)}`
+        : `Closed ${sym}; net realized P&L $${realizedPnlUSD.toFixed(2)}`,
   }));
+  persistPaperAccount(globalState);
 };
 
 export function useAuraStore() {
@@ -794,6 +989,8 @@ export function useAuraStore() {
     closePosition,
     applyBinanceTickerData,
     setBinanceConnected,
+    hydratePaperAccount,
+    resetPaperAccount,
   };
 }
 

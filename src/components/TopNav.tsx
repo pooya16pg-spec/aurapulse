@@ -51,7 +51,7 @@ export default function TopNav() {
               AuraPulse
             </span>
             <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${isBinanceConnected ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30" : "bg-amber-400/10 text-amber-200 border-amber-400/30"}`}>
-              {isBinanceConnected ? "BINANCE LIVE" : "SIMULATED"}
+              {isBinanceConnected ? "BINANCE FEED" : "SIMULATED"}
             </span>
           </div>
 
@@ -59,8 +59,8 @@ export default function TopNav() {
             <ShieldCheck className="w-4 h-4 text-cyan-400" />
             <span>
               {lang === "fa"
-                ? "معمار سیستم: پویا گودرزی (مهندس کامپیوتر)"
-                : "Lead Architect: Pooya Goodarzi (Computer Engineer)"}
+                ? "پورتفولیوی محصول و مهندسی • پویا گودرزی"
+                : "Product & Engineering Portfolio • Pooya Goodarzi"}
             </span>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function TopNav() {
           <div className="flex items-center gap-2">
             <Wallet className="w-4 h-4 text-emerald-400" />
             <span className="text-xs text-slate-400">
-              {lang === "fa" ? "ارزش کل پرتفوی:" : "Net Worth:"}
+              {lang === "fa" ? "ارزش حساب آزمایشی:" : "Account Equity:"}
             </span>
             <span className="font-mono font-bold text-sm md:text-base text-white">
               $
@@ -82,7 +82,7 @@ export default function TopNav() {
           <div className="hidden sm:block h-4 w-[1px] bg-white/10" />
           <div className="hidden sm:flex items-center gap-1.5 text-xs">
             <span className="text-slate-400">
-              {lang === "fa" ? "موجودی نقد:" : "Buying Power:"}
+              {lang === "fa" ? "موجودی نقد:" : "Cash Balance:"}
             </span>
             <span className="font-mono text-cyan-400 font-semibold">
               $

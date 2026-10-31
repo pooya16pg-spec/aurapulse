@@ -1,24 +1,28 @@
-# AuraPulse — Market Dashboard & Paper-Trading Simulator
+# AuraPulse — Market Data & Paper-Trading Studio
 
 **Author:** Pooya Goodarzi  
 **Live site:** https://pooya16pg-spec.github.io/aurapulse/
 
-AuraPulse is a browser-only market dashboard and paper-trading demonstration.
+AuraPulse is a browser-first market dashboard that separates public market quotes from an educational paper-trading simulator.
 
 ## Market data
-- The app polls Binance's public 24-hour ticker endpoint for BTC, ETH, and SOL.
-- The feed is read-only. If the request is blocked, unavailable, or rate-limited, the interface marks the market as simulated and falls back to its local price model.
-- `NVDA/AI` is a synthetic demo instrument, not a listed Binance symbol.
-- The initial portfolio, historical candles, order book depth, AI-style signals, and demo logs are illustrative. They are not institutional exchange data.
+- Reads public 24-hour ticker data for BTC, ETH, and SOL from Binance when the browser can reach the endpoint.
+- Shows the connection state and falls back to clearly labelled illustrative data when the feed is unavailable.
+- NVDA/AI is a synthetic demo instrument, not an exchange-listed product in this app.
+- Seeded candle history, order-book depth, buy/sell pressure, and AI-style markers are illustrative rather than exchange market depth or institutional flow.
 
-## Paper trading
-- Orders update an in-memory browser demo account only.
-- No real trades, exchange credentials, deposits, withdrawals, liquidation engine, persistent storage, or private API are implemented.
-- The local demo bot simulates spot buys. It does not execute an autonomous strategy against an exchange.
+## Paper-trading account
+- Orders are local browser calculations; no API key or exchange order endpoint is used.
+- The demo account supports buy/sell fills, average entry prices, position valuation, realized and unrealized P&L, and a transparent 0.10% illustrative fee assumption.
+- Paper account balance, positions, average entries, and order history are saved in browser localStorage on this device/browser.
+- Use **Reset demo account** to return to the seeded starter account.
+- Clearing browser storage or using another browser/device starts a separate account.
 
-## Technology
-- Next.js 14 static export, React 18, TypeScript, and Tailwind CSS.
-- Custom SVG candlestick visualization with EMA, Bollinger, volume, and RSI display layers.
-- Public Binance ticker requests originate from the visitor's browser; feed access depends on network and endpoint availability.
+## Explore
+- Switch symbols and chart intervals; inspect candlesticks and SVG indicators.
+- Pause the local simulator independently of the public ticker polling.
+- Place paper orders and inspect their fee and P&L effects.
+- Review portfolio equity and reset the local paper account.
 
-**Important:** This project is an educational UI prototype, not an investment tool or a source of financial advice.
+## Stack and deployment
+Next.js 16 static export, React 19, TypeScript, SVG charting, and client-side state. The app is hosted on GitHub Pages; there is no backend account, private exchange API, real order execution, or cross-device persistence.
