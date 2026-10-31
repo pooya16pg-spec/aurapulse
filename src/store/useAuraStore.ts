@@ -753,8 +753,10 @@ const tickMarket = () => {
 
     let nextOrders = state.orders;
     let nextHoldings = state.holdings;
+    let nextAvgEntryPrices = state.avgEntryPrices;
     let nextBalance = state.balanceUSD;
     let nextLogs = state.aiLogs;
+    let botTradePlaced = false;
 
     if (state.isAutoBotActive && tickCounter % 2 === 0 && state.balanceUSD > 500) {
       const activeSym = state.selectedSymbol;
@@ -783,6 +785,11 @@ const tickMarket = () => {
         ...state.holdings,
         [activeSym]: nextUnits,
       };
+      nextAvgEntryPrices = {
+        ...state.avgEntryPrices,
+        [activeSym]: nextAverage,
+      };
+      botTradePlaced = true;
       nextOrders = [botOrder, ...state.orders.slice(0, 99)];
       nextLogs = [
         `[${nowStr}] DEMO-BOT :: Simulated 1x spot BUY on ${activeSym} (${units} units @ ${activePrice})`,
@@ -795,18 +802,12 @@ const tickMarket = () => {
       balanceUSD: nextBalance,
       holdings: nextHoldings,
       orders: nextOrders,
-      avgEntryPrices: nextOrders === state.orders ? state.avgEntryPrices : {
-        ...state.avgEntryPrices,
-        [state.selectedSymbol]: Number(((state.holdings[state.selectedSymbol] * state.avgEntryPrices[state.selectedSymbol] + (400 / updatedAssets[state.selectedSymbol].price) * updatedAssets[state.selectedSymbol].price) / (state.holdings[state.selectedSymbol] + (400 / updatedAssets[state.selectedSymbol].price))).toFixed(4)),
-      },
+      avgEntryPrices: nextAvgEntryPrices,
       aiLogs: nextLogs,
     };
   });
-  if (globalState.isAutoBotActive && tickCounter % 2 === 0 && globalState.balanceUSD > 500) {
-    persistPaperAccount(globalState);
-  }
+  if (botTradePlaced) persistPaperAccount(globalState);
 };
-
 const executeOrder = (
   side: "BUY" | "SELL",
   usdAmount: number,
