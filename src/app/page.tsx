@@ -39,17 +39,24 @@ export default function AuraPulseTerminalPage() {
 
   // Public Binance 24h tickers are read-only; order placement remains local paper trading.
   useEffect(() => {
+    document.documentElement.lang = lang === "fa" ? "fa" : "en";
+    document.documentElement.dir = lang === "fa" ? "rtl" : "ltr";
+  }, [lang]);
+
+  useEffect(() => {
     hydratePaperAccount();
     let active = true;
     let pollTimer: ReturnType<typeof setTimeout> | undefined;
+    let simulationTimer: ReturnType<typeof setInterval> | undefined;
     let controller: AbortController | null = null;
 
     const fetchMarketData = async () => {
-      controller = new AbortController();
+      const requestController = new AbortController();
+      controller = requestController;
       try {
         const res = await fetch(
           "https://api.binance.com/api/v3/ticker/24hr?symbols=%5B%22BTCUSDT%22%2C%22ETHUSDT%22%2C%22SOLUSDT%22%5D",
-          { signal: controller.signal, cache: "no-store" }
+          { signal: requestController.signal, cache: "no-store" }
         );
         if (!res.ok) throw new Error(`Binance returned HTTP ${res.status}`);
 
@@ -94,17 +101,38 @@ export default function AuraPulseTerminalPage() {
           setBinanceConnected(false);
         }
       } finally {
-        if (active) pollTimer = setTimeout(fetchMarketData, 10000);
+        if (active && !document.hidden && controller === requestController) {
+          pollTimer = setTimeout(fetchMarketData, 10000);
+        }
       }
     };
 
-    void fetchMarketData();
-    const simulationTimer = setInterval(tickMarket, 1400);
+    const pauseBackgroundWork = () => {
+      if (pollTimer) clearTimeout(pollTimer);
+      pollTimer = undefined;
+      if (simulationTimer) clearInterval(simulationTimer);
+      simulationTimer = undefined;
+      controller?.abort();
+    };
+
+    const resumeBackgroundWork = () => {
+      if (document.hidden) return;
+      if (!simulationTimer) simulationTimer = setInterval(tickMarket, 1400);
+      if (!pollTimer && !controller) void fetchMarketData();
+      else if (!pollTimer && controller?.signal.aborted) void fetchMarketData();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) pauseBackgroundWork();
+      else resumeBackgroundWork();
+    };
+
+    resumeBackgroundWork();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       active = false;
-      controller?.abort();
-      if (pollTimer) clearTimeout(pollTimer);
-      clearInterval(simulationTimer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      pauseBackgroundWork();
     };
   }, [tickMarket, applyBinanceTickerData, setBinanceConnected, hydratePaperAccount]);
 
