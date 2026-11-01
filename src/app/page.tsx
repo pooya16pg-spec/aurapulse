@@ -37,12 +37,12 @@ export default function AuraPulseTerminalPage() {
     isBinanceConnected,
   } = useAuraStore();
 
-  // Public Binance
-
+  // Public Binance 24h tickers are read-only; order placement remains local paper trading.
   useEffect(() => {
     document.documentElement.lang = lang === "fa" ? "fa" : "en";
     document.documentElement.dir = lang === "fa" ? "rtl" : "ltr";
-  }, [lang]); 24h tickers are read-only; order placement remains local paper trading.
+  }, [lang]);
+
   useEffect(() => {
     hydratePaperAccount();
     let active = true;
