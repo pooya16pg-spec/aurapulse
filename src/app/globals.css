@@ -176,3 +176,9 @@ table { border-collapse: separate; border-spacing: 0; }
 .aurapulse-page { min-height: 100svh; min-height: 100dvh; }
 @media (max-width: 767px) { .aurapulse-page .cyber-card button { min-height: 40px; } }
 @media (hover: none) { .btn-cyber:hover { transform: none; } }
+
+@media (hover: none) and (pointer: coarse) {
+  button, [role="button"] { min-height: 44px; }
+  input:not([type="range"]), textarea, select { min-height: 44px; font-size: 16px; }
+  input[type="range"] { min-height: 44px; padding-block: 12px; }
+}
